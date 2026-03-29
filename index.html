@@ -500,6 +500,8 @@ button,input,select,textarea{font-family:'DM Sans',sans-serif;}
             <button class="dbtn" onclick="ql('service.dryclean@mail.com','dryclean123')"><span>👔</span> Dry Cleaning</button>
             <button class="dbtn" onclick="ql('carrier1@mail.com','carrier123')"><span>📦</span> Carrier 1</button>
             <button class="dbtn" onclick="ql('carrier2@mail.com','carrier123')"><span>📦</span> Carrier 2</button>
+            <button class="dbtn" onclick="ql('carrier3@mail.com','carrier123')"><span>📦</span> Carrier 3</button>
+            <button class="dbtn" onclick="ql('carrier4@mail.com','carrier123')"><span>📦</span> Carrier 4</button>
             <button class="dbtn" onclick="ql('customer@mail.com','customer123')"><span>🛒</span> Customer</button>
             <button class="dbtn" onclick="ql('customer2@mail.com','customer123')"><span>👤</span> Customer 2</button>
           </div>
@@ -1041,13 +1043,31 @@ const FAQS=[
 let DB={users:[],orders:[],serviceRequests:[],currentUser:null,cart:[]};
 
 function loadDB(){
-  try{const r=localStorage.getItem('lm4_db');if(r)DB=JSON.parse(r);}catch(e){}
+  try{const r=localStorage.getItem('lm5_db');if(r)DB=JSON.parse(r);}catch(e){}
   if(!DB.users)DB.users=[];if(!DB.orders)DB.orders=[];
   if(!DB.serviceRequests)DB.serviceRequests=[];if(!DB.cart)DB.cart=[];
-  DEMOS.forEach(d=>{if(!DB.users.find(u=>u.id===d.id))DB.users.push(JSON.parse(JSON.stringify(d)));});
+  // Always overwrite demo users by ID so stale data from older versions is replaced
+  DEMOS.forEach(d=>{
+    const idx=DB.users.findIndex(u=>u.id===d.id);
+    if(idx===-1){DB.users.push(JSON.parse(JSON.stringify(d)));}
+    else{
+      // Preserve live-state & earnings, but fix email/password/role in case of version mismatch
+      DB.users[idx].email=d.email;
+      DB.users[idx].password=d.password;
+      DB.users[idx].role=d.role;
+      DB.users[idx].fname=d.fname;
+      DB.users[idx].lname=d.lname;
+      if(d.role==='rider'){
+        DB.users[idx].routeFrom=DB.users[idx].routeFrom||d.routeFrom||'';
+        DB.users[idx].routeTo=DB.users[idx].routeTo||d.routeTo||'';
+        if(!('earnings' in DB.users[idx]))DB.users[idx].earnings=0;
+        if(!('deliveries' in DB.users[idx]))DB.users[idx].deliveries=0;
+      }
+    }
+  });
   saveDB();
 }
-function saveDB(){try{localStorage.setItem('lm4_db',JSON.stringify(DB));}catch(e){}}
+function saveDB(){try{localStorage.setItem('lm5_db',JSON.stringify(DB));}catch(e){}}
 function getCU(){return DB.users.find(u=>u.id===DB.currentUser);}
 function getVendors(){return DB.users.filter(u=>u.role==='vendor');}
 function getLive(){return getVendors().filter(v=>v.isLive);}
@@ -1427,9 +1447,11 @@ function saveProfile(){const u=getCU();
 function initRider(user){
   const u=getCU();
   document.getElementById('riderWho').textContent=u.fname+' '+u.lname+'\n'+u.email;
-  // Load saved route
-  document.getElementById('routeFrom').value=u.routeFrom||'';
-  document.getElementById('routeTo').value=u.routeTo||'';
+  // Load saved route into sidebar inputs (only exist on desktop)
+  const fromEl=document.getElementById('routeFrom');
+  const toEl=document.getElementById('routeTo');
+  if(fromEl)fromEl.value=u.routeFrom||'';
+  if(toEl)toEl.value=u.routeTo||'';
   updateRouteSub();
   updateRiderLiveUI();showRPanel('rAvail');
   setInterval(()=>{if(getCU()?.id===u.id)refreshRiderPanels();},4000);
@@ -1437,8 +1459,10 @@ function initRider(user){
 
 function saveRoute(){
   const u=getCU();if(!u)return;
-  u.routeFrom=document.getElementById('routeFrom').value;
-  u.routeTo=document.getElementById('routeTo').value;
+  const fromEl=document.getElementById('routeFrom');
+  const toEl=document.getElementById('routeTo');
+  if(fromEl)u.routeFrom=fromEl.value;
+  if(toEl)u.routeTo=toEl.value;
   saveDB();updateRouteSub();
 }
 
@@ -1449,7 +1473,7 @@ function updateRouteSub(){
     sub.textContent=`📍 ${u.routeFrom} → ${u.routeTo} · Showing packages on your path`;
     sub.style.color='var(--gl)';
   } else {
-    sub.textContent='Set your route above to see packages on your path';
+    sub.textContent='Set your route in the sidebar to see packages on your path';
     sub.style.color='var(--gy)';
   }
 }
