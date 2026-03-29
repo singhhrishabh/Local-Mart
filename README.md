@@ -5,6 +5,10 @@
 
 ---
 
+## For Live Demo ( https://singhhrishabh.github.io/Local-Mart/ )
+
+---
+
 ## 🧭 What is LocalMart?
 
 LocalMart is a hyperlocal marketplace platform that digitizes the local economy of a neighbourhood, town, or rural market — the sabziwala, kirana dukan, chat bhandaar, plumber, and the uncle on a scooter going to the next village.
