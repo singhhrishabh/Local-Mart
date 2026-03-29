@@ -5,7 +5,7 @@
 
 ---
 
-## For Live Demo ( https://singhhrishabh.github.io/Local-Mart/ )
+ For Live Demo ( https://singhhrishabh.github.io/Local-Mart/ )
 
 ---
 
