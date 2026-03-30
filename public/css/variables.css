@@ -1,0 +1,56 @@
+/* ═══════════════════════════════════════════════════════
+   LocalMart Design System — Variables & Tokens
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* Brand Colors */
+  --o: #F4631E;    --ol: #FF8A50;    --og: rgba(244,99,30,.1);
+  --g: #1A6B3C;    --gl: #28A05A;    --gg: rgba(40,160,90,.1);
+  --b: #185ADB;    --bl: #3D7BE8;    --bg: rgba(24,90,219,.1);
+  --p: #7B2FBE;    --pl: #9B59D0;    --pg: rgba(123,47,190,.1);
+  --f: #B5451B;    --fl: #D4541F;    --fg: rgba(181,69,27,.1);
+  --y: #D4A017;    --yg: rgba(212,160,23,.1);
+
+  /* Neutrals */
+  --cr: #FDF8F2;   --wh: #fff;       --bk: #0E0E0E;    --gy: #6B6B6B;
+  --lt: #EDE0D0;   --lt2: #F5EDE0;   --sd: #111009;     --s2: #1A1810;
+  --rd: #D93025;
+
+  /* Radii */
+  --r8: 8px;  --r12: 12px;  --r16: 16px;  --r20: 20px;  --r24: 24px;  --r100: 100px;
+
+  /* Layout */
+  --nh: 60px;  --bnh: 64px;
+}
+
+/* ─── Reset ─── */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cr); color: var(--bk); min-height: 100vh; overflow-x: hidden; }
+.hidden { display: none !important; }
+button, input, select, textarea { font-family: 'DM Sans', sans-serif; }
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-thumb { background: var(--lt); border-radius: 3px; }
+
+/* ─── Toast ─── */
+#toast { position: fixed; bottom: calc(var(--bnh) + 10px); right: 14px; z-index: 9999;
+  background: var(--bk); color: #fff; padding: 11px 17px; border-radius: var(--r12);
+  font-size: .82rem; font-weight: 500; box-shadow: 0 6px 24px rgba(0,0,0,.28);
+  display: flex; align-items: center; gap: 8px; max-width: 270px;
+  transform: translateX(120%); transition: transform .36s cubic-bezier(.34,1.56,.64,1); pointer-events: none; }
+#toast.show { transform: translateX(0); }
+.td { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+@media(min-width:768px) { #toast { bottom: 20px; right: 20px; } }
+
+/* ─── Notification Badge ─── */
+.nbadge { position: absolute; top: -4px; right: -4px; background: var(--rd); color: #fff;
+  font-size: .55rem; font-weight: 800; min-width: 16px; height: 16px; border-radius: var(--r100);
+  display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
+/* ─── Color Utilities ─── */
+.c-o { color: var(--o); } .c-g { color: var(--gl); } .c-r { color: var(--rd); } .c-b { color: var(--bl); }
+
+/* ─── Animations ─── */
+@keyframes blink { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+@keyframes scpop { from { transform: scale(0) } to { transform: scale(1) } }
+@keyframes mslide { from { transform: translateY(100%) } to { transform: translateY(0) } }
+@keyframes mfade { from { transform: translateY(22px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }

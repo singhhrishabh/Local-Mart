@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LocalMart — Local se Local</title>
+<meta name="description" content="LocalMart connects your neighbourhood — sabzi wala, kirana store, chai stall, plumber — everyone gets a digital presence. Lucknow, UP.">
+<meta name="theme-color" content="#F4631E">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<!-- CSS Modules -->
+<link rel="stylesheet" href="css/variables.css"/>
+<link rel="stylesheet" href="css/auth.css"/>
+<link rel="stylesheet" href="css/layout.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="css/customer.css"/>
+
+<!-- LeafletJS Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+<body>
+
+<!-- ════════════════════════ AUTH ════════════════════════ -->
+<div id="authScreen">
+  <div class="auth-left">
+    <div class="al-brand">Local<span>Mart</span></div>
+    <div class="al-moto">Local se Local</div>
+    <div class="al-h">Your <em>mohalla</em>,<br>now in your pocket.</div>
+    <div class="al-p">Shops, street food, home services — all within 2–4km. Order, track, book. Supporting local, one delivery at a time.</div>
+    <div class="al-chips">
+      <div class="al-chip">🏪 Local Shops</div>
+      <div class="al-chip">🍽️ Street Food</div>
+      <div class="al-chip">🔧 Home Services</div>
+      <div class="al-chip">📦 Package Carriers</div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-box">
+      <div class="mob-brand">LocalMart</div>
+      <div class="mob-moto">Local se Local</div>
+      <div class="auth-tabs">
+        <button class="atab act" onclick="switchTab('login')">Sign In</button>
+        <button class="atab" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <div id="loginForm">
+        <div id="loginErr" class="aerr hidden"></div>
+        <div class="fg"><label>Email</label>
+          <input type="email" id="liEmail" placeholder="you@mail.com"/></div>
+        <div class="fg"><label>Password</label>
+          <input type="password" id="liPass" placeholder="••••••••"
+            onkeydown="if(event.key==='Enter')doLogin()"/></div>
+        <button class="btn-auth" onclick="doLogin()">Sign In →</button>
+        <div class="asw">New here? <a onclick="switchTab('signup')">Sign up</a></div>
+        <div class="demo-wrap">
+          <b>Quick Demo Access:</b>
+          <div class="demo-grid">
+            <button class="dbtn" onclick="ql('vendor.vegetable@mail.com','vegetable123')"><span>🥦</span> Vegetables</button>
+            <button class="dbtn" onclick="ql('vendor.dairy@mail.com','dairy123')"><span>🧴</span> Dairy</button>
+            <button class="dbtn" onclick="ql('vendor.kirana@mail.com','kirana123')"><span>🛒</span> Kirana</button>
+            <button class="dbtn" onclick="ql('vendor.saree@mail.com','saree123')"><span>👗</span> Saree</button>
+            <button class="dbtn" onclick="ql('food.chaat@mail.com','chaat123')"><span>🍽️</span> Chaat Stall</button>
+            <button class="dbtn" onclick="ql('food.kachori@mail.com','kachori123')"><span>🫔</span> Kachori</button>
+            <button class="dbtn" onclick="ql('food.bakery@mail.com','bakery123')"><span>🥐</span> Bakery</button>
+            <button class="dbtn" onclick="ql('service.plumbing@mail.com','plumbing123')"><span>🔧</span> Plumbing</button>
+            <button class="dbtn" onclick="ql('service.maid@mail.com','maid123')"><span>🧹</span> Maid</button>
+            <button class="dbtn" onclick="ql('service.ac@mail.com','ac123')"><span>❄️</span> AC Service</button>
+            <button class="dbtn" onclick="ql('service.electrician@mail.com','electrician123')"><span>⚡</span> Electrician</button>
+            <button class="dbtn" onclick="ql('service.dryclean@mail.com','dryclean123')"><span>👔</span> Dry Cleaning</button>
+            <button class="dbtn" onclick="ql('carrier1@mail.com','carrier123')"><span>📦</span> Carrier 1</button>
+            <button class="dbtn" onclick="ql('carrier2@mail.com','carrier123')"><span>📦</span> Carrier 2</button>
+            <button class="dbtn" onclick="ql('carrier3@mail.com','carrier123')"><span>📦</span> Carrier 3</button>
+            <button class="dbtn" onclick="ql('carrier4@mail.com','carrier123')"><span>📦</span> Carrier 4</button>
+            <button class="dbtn" onclick="ql('customer@mail.com','customer123')"><span>🛒</span> Customer</button>
+            <button class="dbtn" onclick="ql('customer2@mail.com','customer123')"><span>👤</span> Customer 2</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="signupForm" class="hidden">
+        <div id="signupErr" class="aerr hidden"></div>
+        <div class="role-grid five" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
+          <div class="rc sel" id="rc-vendor" onclick="pickRole('vendor')"><div class="ri">🏪</div><div class="rl">Vendor</div><div class="rs">Sell goods</div></div>
+          <div class="rc" id="rc-food" onclick="pickRole('food')"><div class="ri">🍽️</div><div class="rl">Food Stall</div><div class="rs">Chat/Snacks</div></div>
+          <div class="rc" id="rc-service" onclick="pickRole('service')"><div class="ri">🔧</div><div class="rl">Services</div><div class="rs">Plumber etc</div></div>
+          <div class="rc" id="rc-carrier" onclick="pickRole('carrier')"><div class="ri">📦</div><div class="rl">Carrier</div><div class="rs">Deliver only</div></div>
+          <div class="rc" id="rc-customer" onclick="pickRole('customer')"><div class="ri">🛒</div><div class="rl">Customer</div><div class="rs">Shop & order</div></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label>First Name</label><input type="text" id="suFn" placeholder="Ramesh"/></div>
+          <div class="fg"><label>Last Name</label><input type="text" id="suLn" placeholder="Sharma"/></div>
+        </div>
+        <div class="fg"><label>Email</label><input type="email" id="suEm" placeholder="you@mail.com"/></div>
+        <div class="fg"><label>Phone</label><input type="tel" id="suPh" placeholder="+91 98765 43210"/></div>
+        <div id="bizFields">
+          <div class="fg"><label>Business Name</label><input type="text" id="suNm" placeholder="e.g. Pappu Kirana"/></div>
+          <div class="fg"><label>Category</label>
+            <select id="suCat">
+              <option value="">-- Select --</option>
+              <optgroup label="🏪 Shops"><option value="shop|🥦 Vegetables">🥦 Vegetables</option><option value="shop|🧴 Dairy">🧴 Dairy</option><option value="shop|🛒 Kirana">🛒 Kirana</option><option value="shop|👗 Clothing">👗 Clothing</option></optgroup>
+              <optgroup label="🍽️ Food"><option value="food|🍽️ Chaat">🍽️ Chaat & Snacks</option><option value="food|🥐 Bakery">🥐 Bakery</option><option value="food|🍜 Tiffin">🍜 Tiffin</option></optgroup>
+              <optgroup label="🔧 Services"><option value="service|🔧 Plumbing">🔧 Plumbing</option><option value="service|🧹 Maid">🧹 Maid</option><option value="service|❄️ AC Service">❄️ AC Service</option><option value="service|⚡ Electrician">⚡ Electrician</option><option value="service|👔 Dry Cleaning">👔 Dry Cleaning</option><option value="service|🪚 Carpenter">🪚 Carpenter</option></optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="fg"><label>Password</label><input type="password" id="suPs" placeholder="Min 6 chars"/></div>
+        <button class="btn-auth" onclick="doSignup()">Create Account →</button>
+        <div class="asw">Have account? <a onclick="switchTab('login')">Sign in</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ VENDOR / FOOD / SERVICE DASHBOARD ════════ -->
+<div id="dashScreen" class="hidden app-shell">
+  <div class="sidebar">
+    <div class="sb-brand">Local<span>Mart</span></div>
+    <div class="sb-moto">Local se Local</div>
+    <div class="sb-who" id="sbWho"></div>
+    <div class="live-box">
+      <div class="lb-lbl" id="liveBoxLbl">Visibility</div>
+      <div class="lb-row">
+        <div class="lb-status lb-off" id="liveTxt"><span class="ldot d-off"></span>Offline</div>
+        <button class="tgl off" id="liveTgl" onclick="toggleLive()"></button>
+      </div>
+      <div class="opens-row" id="opensRow" style="display:none">
+        <span class="opens-lbl">Opens at:</span>
+        <input class="opens-inp" type="time" id="opensAt" onchange="saveOpensAt()"/>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <button class="sbn act" onclick="showPanel('dashboard')" data-p="dashboard"><span class="ni">📊</span> Dashboard</button>
+      <button class="sbn" onclick="showPanel('orders')" data-p="orders" id="ordersNavBtn" style="position:relative">
+        <span class="ni">📋</span> <span id="ordersNavLbl">Orders</span>
+        <span class="nbadge" id="ordersBadge" style="display:none">0</span>
+      </button>
+      <button class="sbn" onclick="showPanel('inventory')" data-p="inventory"><span class="ni" id="invIcSb">📦</span> <span id="invLblSb">Inventory</span></button>
+      <button class="sbn" onclick="showPanel('profile')" data-p="profile"><span class="ni">✏️</span> Profile</button>
+      <button class="sbn" onclick="switchToCarrierMode()" style="background:linear-gradient(135deg, rgba(244,99,30,0.1), rgba(40,160,90,0.08)); border:1px solid rgba(244,99,30,0.2)"><span class="ni">🚶</span> Deliver on your way</button>
+      <button class="sbn" onclick="showHelp('dash')"><span class="ni">❓</span> Help</button>
+    </nav>
+    <button class="sb-out" onclick="signOut()">Sign Out</button>
+  </div>
+  <div class="main-area" id="dashMain">
+    <div id="panelDashboard">
+      <div class="pg-hd"><div class="pg-title" id="dashGreet">Welcome 👋</div><div class="pg-sub" id="dashSub">Your overview</div></div>
+      <div class="stats-row">
+        <div class="st"><div class="st-v c-o" id="stItems">0</div><div class="st-l" id="stItemsLbl">Items</div></div>
+        <div class="st"><div class="st-v c-g" id="stAvail">0</div><div class="st-l">Available</div></div>
+        <div class="st"><div class="st-v c-r" id="stPending">0</div><div class="st-l">Pending Orders</div></div>
+        <div class="st"><div class="st-v c-b" id="stToday">0</div><div class="st-l">Completed Today</div></div>
+      </div>
+      <div class="card"><div class="card-h">Quick Tips</div><div id="dashTips" style="display:flex;flex-direction:column;gap:8px;"></div></div>
+    </div>
+    <div id="panelOrders" class="hidden">
+      <div class="pg-hd"><div class="pg-title" id="ordersTitle">Incoming Orders</div><div class="pg-sub" id="ordersSub">Accept orders to assign a delivery carrier</div></div>
+      <div id="ordersList"></div>
+    </div>
+    <div id="panelInventory" class="hidden">
+      <div class="pg-hd"><div class="pg-title" id="invTitle">My Inventory</div><div class="pg-sub">Manage your offerings</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px;flex-wrap:wrap;">
+        <button class="btn-auth" style="width:auto;padding:9px 20px;font-size:.82rem;" onclick="openItemModal()" id="addItemBtn">＋ Add Item</button>
+        <input style="padding:8px 13px;border-radius:var(--r100);border:1.5px solid var(--lt);font-size:.82rem;flex:1;max-width:200px;outline:none;" placeholder="🔍 Search..." oninput="renderInventory(this.value)"/>
+      </div>
+      <div class="inv-grid" id="itemsGrid"></div>
+    </div>
+    <div id="panelProfile" class="hidden">
+      <div class="pg-hd"><div class="pg-title">Edit Profile</div></div>
+      <div class="card" style="max-width:500px;">
+        <div class="fr">
+          <div class="fg"><label>First Name</label><input type="text" id="pfFn"/></div>
+          <div class="fg"><label>Last Name</label><input type="text" id="pfLn"/></div>
+        </div>
+        <div class="fg"><label id="pfNmLbl">Shop Name</label><input type="text" id="pfNm"/></div>
+        <div class="fg"><label>Phone</label><input type="tel" id="pfPh"/></div>
+        <div class="fg"><label>Address / Area</label><input type="text" id="pfAddr"/></div>
+        <button class="btn-auth" style="width:auto;padding:10px 24px;font-size:.86rem;" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+  <div class="bnav dark" id="vendorBnav">
+    <button class="bni act" onclick="vMobNav('dashboard',this)"><div class="bni-ic">📊</div><div class="bni-lbl">Home</div></button>
+    <button class="bni" onclick="vMobNav('orders',this)" style="position:relative"><div class="bni-ic">📋</div><div class="bni-lbl">Orders</div><span class="nbadge" id="ordersBadgeMob" style="display:none">0</span></button>
+    <button class="bni" onclick="vMobNav('inventory',this)"><div class="bni-ic" id="invIcMob">📦</div><div class="bni-lbl" id="invLblMob">Inventory</div></button>
+    <button class="bni" onclick="switchToCarrierMode()" style="color:var(--o)"><div class="bni-ic">🚶</div><div class="bni-lbl">Deliver</div></button>
+    <button class="bni" onclick="showHelp('dash')"><div class="bni-ic">☰</div><div class="bni-lbl">More</div></button>
+  </div>
+</div>
+
+<!-- ════════ PACKAGE CARRIER DASHBOARD ════════ -->
+<div id="riderScreen" class="hidden app-shell">
+  <div class="sidebar">
+    <div class="sb-brand">Local<span>Mart</span></div>
+    <div class="sb-moto">📦 Package Carrier</div>
+    <div class="sb-who" id="riderWho"></div>
+    <div class="live-box">
+      <div class="lb-lbl">My Status</div>
+      <div class="lb-row">
+        <div class="lb-status lb-off" id="riderStatusTxt"><span class="ldot d-off"></span>Off Duty</div>
+        <button class="tgl off" id="riderTgl" onclick="toggleRiderLive()"></button>
+      </div>
+    </div>
+    <div id="routeBox" style="background:var(--s2);border-radius:var(--r16);padding:12px 14px;margin-bottom:20px;border:1px solid rgba(255,255,255,.04);">
+      <div style="font-size:.6rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-bottom:8px;">📍 My Route Today</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <input id="routeFrom" class="opens-inp" style="width:100%;padding:5px 9px;font-size:.76rem;" placeholder="From (e.g. Aminabad)" oninput="saveRoute()"/>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.2);text-align:center;">↓</div>
+        <input id="routeTo" class="opens-inp" style="width:100%;padding:5px 9px;font-size:.76rem;" placeholder="To (e.g. Hazratganj)" oninput="saveRoute()"/>
+      </div>
+      <div style="font-size:.62rem;color:rgba(255,255,255,.18);margin-top:7px;line-height:1.5;">Packages on your route will show up automatically</div>
+    </div>
+    <nav class="sb-nav">
+      <button class="sbn act" onclick="showRPanel('rAvail')" data-rp="rAvail"><span class="ni">🔔</span> Available Packages</button>
+      <button class="sbn" onclick="showRPanel('rActive')" data-rp="rActive" style="position:relative"><span class="ni">🚶</span> Active Carry<span class="nbadge" id="activeDelivBadge" style="display:none">!</span></button>
+      <button class="sbn" onclick="showRPanel('rHistory')" data-rp="rHistory"><span class="ni">📜</span> Carry History</button>
+      <button class="sbn" onclick="showRPanel('rEarnings')" data-rp="rEarnings"><span class="ni">💰</span> My Earnings</button>
+      <button class="sbn" onclick="exitCarrierMode()" id="exitCarrierBtn" style="display:none; margin-top:12px; border-top:1px solid rgba(255,255,255,.05); padding-top:16px"><span class="ni">←</span> Exit to Dashboard</button>
+    </nav>
+    <button class="sb-out" onclick="signOut()">Sign Out</button>
+  </div>
+  <div class="main-area" id="riderMain">
+    <div id="panelRAvail">
+      <div class="pg-hd"><div class="pg-title">Available Packages</div><div class="pg-sub" id="carrierRouteSub">Set your route above to see packages on your path</div></div>
+      <div style="background:linear-gradient(135deg,rgba(244,99,30,.08),rgba(40,160,90,.06));border:1.5px solid var(--lt);border-radius:var(--r20);padding:18px 20px;margin-bottom:18px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;margin-bottom:8px;">📦 How Carrying Works</div>
+        <div style="font-size:.8rem;color:var(--gy);line-height:1.8;">
+          You're <b style="color:var(--bk)">already going somewhere</b> — market, college, worksite, next mohalla.<br>
+          Pick up a package <b style="color:var(--bk)">on your way</b>, drop it off, and earn ₹40–₹80.<br>
+          <span style="color:var(--o);font-weight:600;">No target. No shift. No boss.</span> Just earn on your route.
+        </div>
+      </div>
+      <div id="riderAvailList"></div>
+    </div>
+    <div id="panelRActive" class="hidden">
+      <div class="pg-hd"><div class="pg-title">Active Carry</div><div class="pg-sub">Package in hand — deliver it!</div></div>
+      <div id="riderActiveContent"></div>
+    </div>
+    <div id="panelRHistory" class="hidden">
+      <div class="pg-hd"><div class="pg-title">Carry History</div><div class="pg-sub">All packages you've delivered</div></div>
+      <div id="riderHistoryList"></div>
+    </div>
+    <div id="panelREarnings" class="hidden">
+      <div class="pg-hd"><div class="pg-title">My Earnings</div><div class="pg-sub">What you've earned so far</div></div>
+      <div id="riderEarningsContent"></div>
+    </div>
+  </div>
+  <div class="bnav dark" id="carrierBnav">
+    <button class="bni act" onclick="rMobNav('rAvail',this)"><div class="bni-ic">🔔</div><div class="bni-lbl">Packages</div></button>
+    <button class="bni" onclick="rMobNav('rActive',this)" style="position:relative"><div class="bni-ic">🚶</div><div class="bni-lbl">Active</div><span class="nbadge" id="activeDelivBadgeMob" style="display:none">!</span></button>
+    <button class="bni" onclick="rMobNav('rHistory',this)"><div class="bni-ic">📜</div><div class="bni-lbl">History</div></button>
+    <button class="bni" onclick="rMobNav('rEarnings',this)"><div class="bni-ic">💰</div><div class="bni-lbl">Earn</div></button>
+    <button class="bni" onclick="signOut()" style="color:rgba(217,48,37,.6)"><div class="bni-ic">🚪</div><div class="bni-lbl">Sign Out</div></button>
+  </div>
+</div>
+
+<!-- ════════ CUSTOMER HOME ════════ -->
+<div id="custScreen" class="hidden">
+  <div class="ctop">
+    <div class="ctop-inner">
+      <div class="ct-brand"><div class="ct-logo">Local<span>Mart</span></div><div class="ct-moto">Local se Local · 2–4km</div></div>
+      <input class="ct-search" id="cSearch" placeholder="Search shops, food, services..." oninput="renderHome()"/>
+      <div class="ct-right">
+        <button class="cart-btn" onclick="openCartModal()">🛒 <div class="cbadge" id="cartBadge">0</div></button>
+        <button style="padding:7px 13px;border-radius:var(--r100);border:1.5px solid var(--lt);background:#fff;cursor:pointer;font-size:.76rem;" onclick="signOut()">Out</button>
+      </div>
+    </div>
+    <div class="sec-tabs">
+      <button class="stab act" onclick="setSection('all')">🏠 All</button>
+      <button class="stab" onclick="setSection('shops')">🏪 Shops</button>
+      <button class="stab" onclick="setSection('food')">🍽️ Food</button>
+      <button class="stab" onclick="setSection('services')">🔧 Services</button>
+      <button class="stab" onclick="setSection('myorders')">📦 My Orders</button>
+      <button class="stab" onclick="switchToCarrierMode()" style="background:#FFF3E0; border-color:var(--o); margin-left:auto"><b style="color:var(--o);">🚶 Earn & Deliver</b></button>
+    </div>
+  </div>
+  <div class="home-body">
+    <div class="map-panel">
+      <div class="mp-title">Live Map <span class="live-cnt" id="liveCnt">0 Live</span></div>
+      <div id="liveMap" style="height: 220px; width: 100%; border-radius:12px; z-index:1;"></div>
+      <div class="mv-list" id="mapList"></div>
+    </div>
+    <div class="grid-wrap">
+      <div class="cg-title" id="gridTitle">ALL NEAR YOU</div>
+      <div class="cgrid" id="mainGrid"></div>
+    </div>
+  </div>
+  <div class="bnav">
+    <button class="bni act" onclick="setCustTab('all',this)"><div class="bni-ic">🏠</div><div class="bni-lbl">Home</div></button>
+    <button class="bni" onclick="setCustTab('shops',this)"><div class="bni-ic">🏪</div><div class="bni-lbl">Shops</div></button>
+    <button class="bni" onclick="switchToCarrierMode()"><div class="bni-ic">🚶</div><div class="bni-lbl" style="color:var(--o);font-weight:700">Deliver</div></button>
+    <button class="bni" onclick="openCartModal()"><div class="bni-ic">🛒</div><div class="bni-lbl">Cart</div></button>
+    <button class="bni" onclick="setSection('myorders')"><div class="bni-ic">📦</div><div class="bni-lbl">Orders</div></button>
+  </div>
+</div>
+
+<!-- ════════ SHOP DETAIL ════════ -->
+<div id="detailScreen" class="hidden">
+  <div class="dtop">
+    <button class="back-btn" onclick="goBack()">← Back</button>
+    <div style="flex:1;min-width:0;">
+      <div class="dt-nm" id="dtName"></div>
+      <div class="dt-sub" id="dtSub"></div>
+    </div>
+    <button class="cart-btn" onclick="openCartModal()">🛒 <div class="cbadge" id="cartBadge2">0</div></button>
+  </div>
+  <div class="dbody">
+    <div class="d-items">
+      <div class="d-items-lbl" id="dItemsLbl">Items</div>
+      <div class="ilist" id="ilist"></div>
+      <div id="svcReqSection" style="display:none">
+        <div class="svc-req-box" style="margin-top:20px;border-color:var(--b);">
+          <div class="svc-req-title">🔎 Don't see what you need?</div>
+          <div class="svc-req-sub">Describe your issue and we'll find you a local expert — even if they aren't registered yet.</div>
+          <div class="fg"><label>Type of Service Needed</label>
+            <select id="reqSvcType">
+              <option value="">-- Select --</option>
+              <option>🔧 Plumbing</option><option>🪚 Carpenter</option>
+              <option>⚡ Electrician</option><option>❄️ AC Service/Repair</option>
+              <option>🧹 Maid/Cleaning</option><option>👔 Dry Cleaning</option>
+              <option>🎨 Painting</option><option>Other</option>
+            </select>
+          </div>
+          <div class="fg"><label>Describe Your Issue</label>
+            <textarea id="reqIssue" rows="3" placeholder="e.g. Kitchen pipe is leaking, need urgent fix..."></textarea>
+          </div>
+          <div class="fg"><label>Your Address</label>
+            <input type="text" id="reqAddr" placeholder="House no, Street, Area..."/></div>
+          <button class="btn-auth" style="width:auto;padding:10px 22px;font-size:.84rem;" onclick="submitSvcRequest()">📤 Send Request</button>
+        </div>
+      </div>
+    </div>
+    <div class="d-cart">
+      <div class="cart-hd" id="cartHd">🛒 Your Cart</div>
+      <div id="cartPanel"></div>
+    </div>
+  </div>
+  <button class="float-cart" id="floatCart" onclick="openCartModal()">🛒 View Cart · <span id="floatTxt"></span></button>
+  <div class="bnav">
+    <button class="bni" onclick="goBack()"><div class="bni-ic">←</div><div class="bni-lbl">Back</div></button>
+    <button class="bni" onclick="openCartModal()"><div class="bni-ic">🛒</div><div class="bni-lbl">Cart</div></button>
+    <button class="bni" onclick="setSection('myorders');goBack()"><div class="bni-ic">📦</div><div class="bni-lbl">My Orders</div></button>
+  </div>
+</div>
+
+<!-- ════════ HELP PAGE ════════ -->
+<div id="helpScreen" class="hidden">
+  <div class="dtop">
+    <button class="back-btn" onclick="goBackHelp()">← Back</button>
+    <div><div class="dt-nm">Help & Contact</div><div class="dt-sub">LocalMart · Local se Local</div></div>
+  </div>
+  <div style="max-width:680px;margin:0 auto;padding:22px 16px;padding-bottom:calc(var(--bnh)+20px);">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:24px;">
+      <div onclick="toast('Opening WhatsApp...','green')" style="background:#fff;border-radius:var(--r20);padding:18px;border:1.5px solid var(--lt);text-align:center;cursor:pointer;">
+        <div style="font-size:1.8rem;margin-bottom:8px;">💬</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.86rem;">WhatsApp</div>
+        <div style="font-size:.72rem;color:var(--gy);margin-top:3px;">Chat instantly</div>
+      </div>
+      <div onclick="toast('Calling support...','green')" style="background:#fff;border-radius:var(--r20);padding:18px;border:1.5px solid var(--lt);text-align:center;cursor:pointer;">
+        <div style="font-size:1.8rem;margin-bottom:8px;">📞</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.86rem;">Call Us</div>
+        <div style="font-size:.72rem;color:var(--gy);margin-top:3px;">+91 98765 00000</div>
+      </div>
+      <div onclick="toast('Opening email...','green')" style="background:#fff;border-radius:var(--r20);padding:18px;border:1.5px solid var(--lt);text-align:center;cursor:pointer;">
+        <div style="font-size:1.8rem;margin-bottom:8px;">📧</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.86rem;">Email</div>
+        <div style="font-size:.72rem;color:var(--gy);margin-top:3px;">help@localmart.in</div>
+      </div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:12px;">FAQ</div>
+    <div id="faqList"></div>
+    <div style="background:var(--og);border-radius:var(--r20);padding:20px;margin-top:24px;border:1px solid rgba(244,99,30,.2);">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;margin-bottom:8px;">🤝 Local se Local</div>
+      <div style="font-size:.83rem;line-height:1.75;color:#4a3020;">LocalMart connects your neighbourhood — sabzi wala, kirana store, chai stall, plumber — everyone gets a digital presence. Supporting local, always.</div>
+    </div>
+  </div>
+  <div class="bnav">
+    <button class="bni" onclick="goBackHelp()"><div class="bni-ic">←</div><div class="bni-lbl">Back</div></button>
+    <button class="bni" onclick="toast('WhatsApp','green')"><div class="bni-ic">💬</div><div class="bni-lbl">Chat</div></button>
+    <button class="bni" onclick="toast('Calling...','green')"><div class="bni-ic">📞</div><div class="bni-lbl">Call</div></button>
+  </div>
+</div>
+
+<!-- ════════ MODALS ════════ -->
+<div class="mover hidden" id="itemModal">
+  <div class="mbox">
+    <div class="m-hd"><div class="m-title" id="modalTitle">Add Item</div><button class="m-close" onclick="closeM('itemModal')">✕</button></div>
+    <div class="fg"><label>Icon</label><div class="ep" id="emojiPicker"></div><input id="selEmoji" type="hidden"/></div>
+    <div class="fg"><label id="iNmLbl">Name</label><input type="text" id="iNm"/></div>
+    <div class="fr">
+      <div class="fg"><label>Price (₹)</label><input type="number" id="iPr"/></div>
+      <div class="fg"><label id="iUtLbl">Unit</label><input type="text" id="iUt"/></div>
+    </div>
+    <div class="fg" id="iDescGroup" style="display:none"><label>Description</label><textarea id="iDesc" rows="2"></textarea></div>
+    <div class="m-foot"><button class="btn-can" onclick="closeM('itemModal')">Cancel</button><button class="btn-sv" onclick="saveItem()">Save</button></div>
+  </div>
+</div>
+
+<div class="mover hidden" id="bookModal">
+  <div class="mbox">
+    <div class="m-hd"><div class="m-title" id="bookTitle">Book Service</div><button class="m-close" onclick="closeM('bookModal')">✕</button></div>
+    <div class="book-type-btns">
+      <div class="btb sel" id="btNow" onclick="setBookType('now')"><div class="bi">⚡</div><div class="bl">Book Now</div><div class="bs">~15 min arrival</div></div>
+      <div class="btb" id="btSchedule" onclick="setBookType('schedule')"><div class="bi">📅</div><div class="bl">Schedule</div><div class="bs">Pick date & time</div></div>
+    </div>
+    <div id="scheduleFields" style="display:none">
+      <div class="fg"><label>Date</label><input type="date" id="bookDate"/></div>
+      <div class="fg"><label>Time Slot</label>
+        <div class="bslot-grid">
+          <div class="bslot" onclick="pickSlot(this,'8:00 AM')">8:00 AM</div>
+          <div class="bslot" onclick="pickSlot(this,'10:00 AM')">10:00 AM</div>
+          <div class="bslot" onclick="pickSlot(this,'12:00 PM')">12:00 PM</div>
+          <div class="bslot" onclick="pickSlot(this,'2:00 PM')">2:00 PM</div>
+          <div class="bslot" onclick="pickSlot(this,'4:00 PM')">4:00 PM</div>
+          <div class="bslot" onclick="pickSlot(this,'6:00 PM')">6:00 PM</div>
+        </div>
+        <input id="bookSlot" type="hidden"/>
+      </div>
+    </div>
+    <div class="fg"><label>Your Address</label><input type="text" id="bookAddr" placeholder="House no, Street, Area..."/></div>
+    <div class="fg"><label>Notes (optional)</label><textarea id="bookNote" rows="2" placeholder="Any special instructions..."></textarea></div>
+    <div class="m-foot"><button class="btn-can" onclick="closeM('bookModal')">Cancel</button><button class="btn-sv" style="background:var(--b)" onclick="confirmBooking()">Confirm</button></div>
+  </div>
+</div>
+
+<div class="mover hidden" id="checkoutModal">
+  <div class="mbox">
+    <div class="m-hd"><div class="m-title">📦 Place Order</div><button class="m-close" onclick="closeM('checkoutModal')">✕</button></div>
+    <div class="fg"><label>Delivery Address</label><input type="text" id="chkAddr" placeholder="House no, Street, Area..."/></div>
+    <div class="fg"><label>Phone Number</label><input type="tel" id="chkPhone" placeholder="+91 98765 43210"/></div>
+    <div class="fg"><label>Payment Mode</label>
+      <select id="chkPayment"><option value="cod">💵 Cash on Delivery</option><option value="upi">📱 UPI / QR Code</option></select>
+    </div>
+    <div id="chkSummary" style="background:var(--cr);border-radius:var(--r12);padding:14px;margin:14px 0;font-size:.82rem;"></div>
+    <div class="m-foot"><button class="btn-can" onclick="closeM('checkoutModal')">Cancel</button><button class="btn-sv" style="background:var(--g)" onclick="placeOrder()">Place Order →</button></div>
+  </div>
+</div>
+
+<div class="mover hidden" id="cartModal">
+  <div class="mbox">
+    <div class="m-hd"><div class="m-title">🛒 Your Cart</div><button class="m-close" onclick="closeM('cartModal')">✕</button></div>
+    <div id="cartModalBody"></div>
+  </div>
+</div>
+
+<div class="mover hidden" id="declineModal">
+  <div class="mbox">
+    <div class="m-hd"><div class="m-title">Decline Request</div><button class="m-close" onclick="closeM('declineModal')">✕</button></div>
+    <div class="fg"><label>Reason for declining</label>
+      <textarea id="declineReason" rows="3" placeholder="e.g. Not available in your area, too busy this week..."></textarea>
+    </div>
+    <input type="hidden" id="declineReqId"/>
+    <div class="m-foot"><button class="btn-can" onclick="closeM('declineModal')">Cancel</button><button class="btn-sv" style="background:var(--rd)" onclick="confirmDecline()">Decline</button></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"><div class="td" id="toastDot"></div><span id="toastMsg"></span></div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<!-- Leaflet SDK -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- JS Modules (order matters — dependencies first) -->
+<script src="js/firebase-config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/map.js"></script>
+<script src="js/vendor.js"></script>
+<script src="js/carrier.js"></script>
+<script src="js/customer.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
