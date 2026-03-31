@@ -1,20 +1,17 @@
 /* ═══════════════════════════════════════════════════════
    LocalMart — Shared Components: Cards, Stats, Buttons
    ═══════════════════════════════════════════════════════ */
-
 /* ─── Stats Row ─── */
 .stats-row { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 22px; }
 @media(min-width:500px) { .stats-row { grid-template-columns: repeat(4,1fr); } }
 .st { background: #fff; border-radius: var(--r16); padding: 15px; border: 1.5px solid var(--lt); }
 .st-v { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; }
 .st-l { font-size: .7rem; color: var(--gy); margin-top: 2px; }
-
 /* ─── Cards ─── */
 .card { background: #fff; border-radius: var(--r20); border: 1.5px solid var(--lt); padding: 20px; }
 .card+.card { margin-top: 12px; }
 .card-h { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .96rem; margin-bottom: 14px;
   display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-
 /* ─── Order Cards ─── */
 .order-card { background: #fff; border-radius: var(--r16); border: 1.5px solid var(--lt);
   padding: 14px 16px; margin-bottom: 10px; transition: all .2s; }
@@ -44,7 +41,6 @@
 .btn-pickup { background: var(--og); color: var(--o); }
 .btn-deliver { background: var(--gg); color: var(--gl); }
 .btn-blue { background: var(--bg); color: var(--bl); }
-
 /* ─── Inventory Grid ─── */
 .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 11px; }
 .icard { background: #fff; border-radius: var(--r20); border: 1.5px solid var(--lt); overflow: hidden; transition: transform .2s; }
@@ -63,19 +59,16 @@
 .b-oos { background: rgba(244,99,30,.08); color: var(--o); }
 .b-del { background: rgba(217,48,37,.08); color: var(--rd); }
 .b-rst { background: var(--gg); color: var(--gl); }
-
 /* ─── Live Tracking Map ─── */
 .track-map-wrap { position: relative; background: #EDE4D8; border-radius: var(--r16); overflow: hidden;
   margin: 14px 0; border: 1.5px solid var(--lt); }
 #trackMapSvg { display: block; width: 100%; }
-
 /* ─── Success Box ─── */
 .success-box { text-align: center; padding: 24px 12px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .suc-ring { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-size: 1.6rem; border: 3px solid; animation: scpop .4s cubic-bezier(.34,1.56,.64,1); }
 .suc-g { background: var(--gg); border-color: var(--gl); }
 .suc-b { background: var(--bg); border-color: var(--bl); }
-
 /* ─── Rider Earnings ─── */
 .rider-map-wrap { background: #EDE4D8; border-radius: var(--r20); overflow: hidden;
   margin-bottom: 14px; border: 1.5px solid var(--lt); }
@@ -84,7 +77,6 @@
 .earn-item { text-align: center; }
 .earn-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; letter-spacing: -1px; }
 .earn-lbl { font-size: .68rem; color: var(--gy); margin-top: 2px; }
-
 /* ─── Service Request ─── */
 .svc-req-box { background: #fff; border-radius: var(--r20); padding: 20px; border: 1.5px solid var(--lt); margin-top: 20px; }
 .svc-req-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; margin-bottom: 4px; }

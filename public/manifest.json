@@ -1,0 +1,16 @@
+{
+  "name": "LocalMart — Local se Local",
+  "short_name": "LocalMart",
+  "description": "Hyperlocal marketplace for Pratapgarh & Jaunpur. Shops, food, services — all within 2-4km.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#F4631E",
+  "background_color": "#FDF8F2",
+  "icons": [
+    { "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23F4631E' rx='20' width='100' height='100'/><text x='50' y='68' text-anchor='middle' font-size='52' fill='white'>🏪</text></svg>", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "categories": ["shopping", "food", "utilities"],
+  "lang": "hi",
+  "dir": "ltr"
+}

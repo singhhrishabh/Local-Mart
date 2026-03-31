@@ -1,6 +1,4 @@
-// ═══════════════════════════════════════════════════════
-// LocalMart — Customer Home, Detail, Cart, Checkout
-// ═══════════════════════════════════════════════════════
+// LocalMart — Customer (Offline + COD)
 
 let activeSection = 'all';
 let currentVendorId = null;
@@ -37,10 +35,10 @@ function renderHome() {
   document.getElementById('liveCnt').textContent = getLive().filter(v => v.type !== 'service').length + ' Live';
   renderMapSVG(); renderMapList();
 
-  const lbl = search ? `RESULTS (${vendors.length})` : activeSection === 'shops' ? 'SHOPS NEAR YOU' : activeSection === 'food' ? 'FOOD & SNACKS' : 'ALL NEARBY';
+  const lbl = search ? `RESULTS (${vendors.length})` : activeSection === 'shops' ? T('shops').toUpperCase() : activeSection === 'food' ? T('food').toUpperCase() : T('all_near');
   document.getElementById('gridTitle').textContent = lbl;
   const grid = document.getElementById('mainGrid');
-  if (!vendors.length) { grid.innerHTML = `<div style="text-align:center;padding:50px;color:var(--gy);grid-column:1/-1">😔 Nothing found right now</div>`; return; }
+  if (!vendors.length) { grid.innerHTML = `<div style="text-align:center;padding:50px;color:var(--gy);grid-column:1/-1">😔 ${T('no_results')}</div>`; return; }
 
   const bgs = ['#FFF3E0', '#F3E5F5', '#E8F5E9', '#FFF8E1', '#FCE4EC', '#E3F2FD', '#EDE7F6', '#E0F2F1', '#FFF9C4'];
   const live = vendors.filter(v => v.isLive);
@@ -54,9 +52,8 @@ function renderHome() {
     return `<div class="scard ${v.isLive ? '' : 'closed-card'}" onclick="${v.isLive ? `openDetail('${v.id}')` : `closedToast('${v.bizName}','${v.opensAt}')`}">
       <div class="sc-banner" style="background:${bg}">
         <span>${emoji}</span>
-        ${v.isLive ? `<div class="sc-live-tag ${isF ? 'lt-food' : 'lt-shop'}"><div class="sc-ld"></div>Open</div>` : `<div class="closed-tag">Closed</div>`}
+        ${v.isLive ? `<div class="sc-live-tag ${isF ? 'lt-food' : 'lt-shop'}"><div class="sc-ld"></div>${T('open')}</div>` : `<div class="closed-tag">${T('closed')}</div>`}
         ${!v.isLive && ot ? `<div class="opens-bub">⏰ ${ot}</div>` : ''}
-        ${!v.isLive && v.opensAt && !ot ? `<div class="opens-bub">Opens ${fmtTime(v.opensAt)}</div>` : ''}
       </div>
       <div class="sc-body">
         <div class="sc-nm">${v.bizName}</div>
@@ -69,7 +66,7 @@ function renderHome() {
 
 // ─── Services Page ───
 function renderServicesPage(search = '') {
-  document.getElementById('gridTitle').textContent = 'HOME SERVICES NEAR YOU';
+  document.getElementById('gridTitle').textContent = T('services').toUpperCase();
   document.getElementById('liveCnt').textContent = getLive().filter(v => v.type === 'service').length + ' Available';
   renderMapSVG(true); renderMapList(true);
   const svcVendors = getVendors().filter(v => v.type === 'service' && (!search || v.bizName?.toLowerCase().includes(search)));
@@ -98,7 +95,7 @@ function renderServicesPage(search = '') {
 
 // ─── My Orders ───
 function renderMyOrders() {
-  document.getElementById('gridTitle').textContent = 'MY ORDERS & BOOKINGS';
+  document.getElementById('gridTitle').textContent = T('my_orders').toUpperCase();
   const u = getCU(); if (!u) return;
   const ts = dt => dt && dt.toMillis ? dt.toMillis() : dt || 0;
   const myOrders = DB.orders.filter(o => o.customerId === u.id).sort((a, b) => ts(b.createdAt) - ts(a.createdAt));
@@ -108,7 +105,6 @@ function renderMyOrders() {
     grid.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--gy);grid-column:1/-1">
       <div style="font-size:2.5rem;margin-bottom:12px">📦</div>
       <div style="font-family:'Syne',sans-serif;font-weight:700">No orders yet</div>
-      <div style="font-size:.84rem;margin-top:6px">Start shopping or book a service!</div>
     </div>`;
     return;
   }
@@ -119,12 +115,13 @@ function renderMyOrders() {
       return `<div class="order-card" style="grid-column:1/-1;cursor:default">
         <div class="oc-top">
           <div><div class="oc-id">Order ${o.id}</div><div class="oc-cust">🏪 ${o.vendorName}</div></div>
-          <div class="oc-status s-${o.status.replace(/_/g, '')}">${statusLabel(o.status)}</div>
+          <div class="oc-status s-${o.status.replace(/_/g,'')}">${statusLabel(o.status)}</div>
         </div>
         <div class="oc-items">${o.items.map(i => `${i.emoji} ${i.name} ×${i.qty}`).join(' · ')}</div>
         ${rider ? `<div style="font-size:.74rem;color:var(--bl);margin-bottom:8px">🛵 ${rider.fname} ${rider.lname} · ${rider.phone}</div>` : ''}
-        ${showTrack ? `<div style="background:var(--bg);border-radius:var(--r12);padding:10px 12px;font-size:.8rem;color:var(--bl);margin-bottom:8px">📍 Live tracking: Carrier is on the way!</div>` : ''}
-        <div class="oc-foot"><div class="oc-addr">📍 ${o.address}</div><div class="oc-total">₹${o.total}</div></div>
+        ${showTrack ? `<div style="background:var(--bg);border-radius:var(--r12);padding:10px 12px;font-size:.8rem;color:var(--bl);margin-bottom:8px">📍 Live tracking: Carrier on the way!</div>` : ''}
+        <div class="oc-foot"><div class="oc-addr">📍 ${o.address}</div><div class="oc-total">₹${o.total} · 💵 COD</div></div>
+        ${o.declineReason ? `<div style="font-size:.74rem;color:var(--rd);margin-top:6px">❌ Declined: ${o.declineReason} <button class="add-btn" onclick="setSection('all')" style="margin-left:8px;font-size:.7rem">${T('alt_shop')}</button></div>` : ''}
       </div>`;
     }),
     ...myReqs.map(r => `
@@ -135,7 +132,6 @@ function renderMyOrders() {
         </div>
         <div class="oc-items">${r.issue}</div>
         ${r.declineReason ? `<div style="font-size:.74rem;color:var(--rd);margin-top:4px">Reason: ${r.declineReason}</div>` : ''}
-        <div style="font-size:.72rem;color:var(--gy);margin-top:8px">📍 ${r.address}</div>
       </div>`)
   ].join('');
 }
@@ -167,7 +163,8 @@ function renderDetailItems(v) {
   el.innerHTML = items.map(item => {
     const qty = cartQty(v.id, item.id);
     return `<div class="irow ${item.avail ? '' : 'oos'}">
-      <div class="ir-ic" style="background:${isS ? 'var(--bg)' : isF ? 'var(--fg)' : 'var(--og)'}">${item.emoji}</div>
+      ${item.image ? `<img src="${item.image}" style="width:42px;height:42px;border-radius:var(--r12);object-fit:cover;flex-shrink:0">` :
+      `<div class="ir-ic" style="background:${isS ? 'var(--bg)' : isF ? 'var(--fg)' : 'var(--og)'}">${item.emoji}</div>`}
       <div class="ir-inf">
         <div class="ir-nm">${item.name}</div>
         <div class="ir-ut">${item.unit}</div>
@@ -176,8 +173,8 @@ function renderDetailItems(v) {
       </div>
       <div class="ir-pr">₹${item.price}</div>
       ${item.avail ? (isS ? `
-        <button class="book-now-btn" onclick="openBookModal('${v.id}','${item.id}','now')" title="15 min arrival">⚡ Now</button>
-        <button class="book-later-btn" onclick="openBookModal('${v.id}','${item.id}','schedule')" title="Pick date & time">📅</button>
+        <button class="book-now-btn" onclick="openBookModal('${v.id}','${item.id}','now')">⚡ Now</button>
+        <button class="book-later-btn" onclick="openBookModal('${v.id}','${item.id}','schedule')">📅</button>
       ` : qty === 0 ? `<button class="add-btn" onclick="addCart('${v.id}','${item.id}')">Add +</button>` : `
         <div class="qty-ctrl">
           <button class="qbtn" onclick="changeQty('${v.id}','${item.id}',-1)">−</button>
@@ -209,13 +206,13 @@ function submitSvcRequest() {
       if (db) db.collection("serviceRequests").doc(vReq.id).set(vReq);
       else DB.serviceRequests.push(vReq);
     });
-    toast('Request sent to ' + matching.length + ' service provider(s)! They\'ll contact you shortly 📞', 'blue');
+    toast('Request sent to ' + matching.length + ' provider(s)! 📞', 'blue');
   } else {
     req.vendorId = null;
     if (db) Object.assign(req, { createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     if (db) db.collection("serviceRequests").doc(req.id).set(req);
     else DB.serviceRequests.push(req);
-    toast('Request submitted! Our team will find you a provider within 2 hrs 📞', 'blue');
+    toast('Request submitted! We\'ll find you a provider 📞', 'blue');
   }
   if (!db) saveDB();
   ['reqSvcType', 'reqIssue', 'reqAddr'].forEach(id => { document.getElementById(id).value = ''; });
@@ -260,7 +257,7 @@ function renderCartPanel() {
   const v = DB.users.find(u => u.id === currentVendorId);
   const isS = v?.type === 'service';
   if (!DB.cart.length) {
-    p.innerHTML = `<div class="cart-empty-p"><div style="font-size:2rem">${isS ? '📋' : '🛒'}</div><div>${isS ? 'Book a service above' : 'Cart is empty'}</div></div>`;
+    p.innerHTML = `<div class="cart-empty-p"><div style="font-size:2rem">${isS ? '📋' : '🛒'}</div><div>${isS ? 'Book a service above' : T('cart_empty')}</div></div>`;
     return;
   }
   const sub = DB.cart.reduce((s, x) => s + x.price * x.qty, 0);
@@ -276,15 +273,14 @@ function renderCartPanel() {
     <div class="c-summary">
       <div class="cs-row"><span>Subtotal</span><span>₹${sub}</span></div>
       ${isS ? '' : `<div class="cs-row"><span>Delivery</span><span>${del ? '₹' + del : '🎉 Free'}</span></div>`}
-      ${sub < 300 && !isS ? `<div style="font-size:.67rem;color:var(--gl);margin-bottom:5px">Add ₹${300 - sub} for free delivery</div>` : ''}
       <div class="cs-total"><span>Total</span><span>₹${sub + del}</span></div>
-      <button class="checkout-btn" onclick="openCheckout()" style="${isS ? 'background:var(--b);box-shadow:0 4px 12px rgba(24,90,219,.2)' : ''}">
-        ${isS ? 'Confirm Booking →' : 'Checkout →'}
+      <button class="checkout-btn" onclick="openCheckout()" style="${isS ? 'background:var(--b)' : ''}">
+        ${isS ? 'Confirm Booking →' : T('checkout')}
       </button>
     </div>`;
 }
 
-// ─── Checkout ───
+// ─── Checkout (COD ONLY + Offline Queue + Defensive UI) ───
 function openCheckout() {
   const u = getCU();
   document.getElementById('chkAddr').value = '';
@@ -295,17 +291,29 @@ function openCheckout() {
   document.getElementById('chkSummary').innerHTML = `
     ${DB.cart.map(x => `${x.emoji} ${x.name} ×${x.qty} — ₹${x.price * x.qty}`).join('<br>')}
     <hr style="border:1px solid var(--lt);margin:8px 0;">
-    Subtotal: ₹${sub}<br>Delivery: ${del ? '₹' + del : 'Free'}<br><b>Total: ₹${sub + del}</b>`;
+    Subtotal: ₹${sub}<br>Delivery: ${del ? '₹' + del : 'Free'}<br><b>Total: ₹${sub + del}</b><br>
+    <div style="margin-top:6px;padding:6px 10px;background:var(--gg);border-radius:var(--r8);font-size:.78rem;color:var(--gl)">💵 ${T('cod')}</div>`;
   closeM('cartModal');
   document.getElementById('checkoutModal').classList.remove('hidden');
 }
 
-function placeOrder() {
+async function placeOrder() {
   const addr = document.getElementById('chkAddr').value.trim();
   const phone = document.getElementById('chkPhone').value.trim();
-  if (!addr || !phone) { toast('Enter delivery address & phone', 'red'); return; }
+  if (!addr || !phone) { toast(T('delivery_addr') + ' & ' + T('phone') + ' required', 'red'); return; }
+
+  // Cart validation
+  if (!DB.cart.length) { toast('Cart is empty!', 'red'); return; }
+  const vendor = DB.users.find(u => u.id === DB.cart[0]?.shopId);
+  if (!vendor) { toast('Vendor not found', 'red'); return; }
+
+  // Validate all items still available
+  for (const c of DB.cart) {
+    const item = (vendor.items || []).find(i => i.id === c.itemId);
+    if (!item || !item.avail) { toast(`${c.name} is no longer available`, 'red'); return; }
+  }
+
   const u = getCU();
-  const vendor = DB.users.find(u => u.id === DB.cart[0]?.shopId); if (!vendor) return;
   const isS = vendor.type === 'service';
   const sub = DB.cart.reduce((s, x) => s + x.price * x.qty, 0);
   const del = isS ? 0 : deliveryFeeForOrder(sub);
@@ -314,13 +322,34 @@ function placeOrder() {
     vendorId: vendor.id, vendorName: vendor.bizName, vendorAddress: vendor.address || 'Local Area',
     riderId: null, phone, address: addr,
     items: DB.cart.map(x => ({ name: x.name, price: x.price, qty: x.qty, emoji: x.emoji })),
-    total: sub + del, deliveryFee: del, payment: document.getElementById('chkPayment').value,
+    total: sub + del, deliveryFee: del, payment: 'cod', // COD ONLY
     status: 'pending', createdAt: Date.now(),
   };
-  if (db) Object.assign(newOrder, { createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-  
-  if (db) db.collection("orders").doc(newOrder.id).set(newOrder);
-  else DB.orders.push(newOrder);
+
+  // Offline or Online?
+  if (navigator.onLine && db) {
+    try {
+      newOrder.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await withLatencyGuard(db.collection("orders").doc(newOrder.id).set(newOrder), 10000);
+      // WhatsApp notification to vendor
+      if (vendor.phone) triggerWhatsApp(vendor.phone, `New Order ${newOrder.id}: ${newOrder.items.map(i => i.name + ' ×' + i.qty).join(', ')} | Total: ₹${newOrder.total} | Location: ${addr}`);
+      logAudit('order_placed', newOrder.id, `Customer: ${u.fname}, Vendor: ${vendor.bizName}, ₹${newOrder.total}`);
+    } catch (e) {
+      if (e.message === 'LATENCY_TIMEOUT') {
+        // Defensive UI: show retry/SMS buttons
+        await queueOrder(newOrder);
+        showLatencyFallback(newOrder);
+        return;
+      }
+      // Other error → queue offline
+      await queueOrder(newOrder);
+      toast(T('order_queued'), 'blue');
+    }
+  } else {
+    // Offline → queue
+    await queueOrder(newOrder);
+    toast(T('order_queued'), 'blue');
+  }
 
   DB.cart = []; saveDB();
   updateCartBadges(); updateFloatCart(); renderCartPanel();
@@ -329,15 +358,46 @@ function placeOrder() {
   document.getElementById('cartPanel').innerHTML = `
     <div class="success-box">
       <div class="suc-ring suc-g">✓</div>
-      <div style="font-family:'Syne',sans-serif;font-weight:800">Order Placed!</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800">${T('order_placed')}</div>
       <div style="color:var(--gy);font-size:.8rem">from ${vendor.bizName}</div>
       <div style="background:var(--og);padding:10px 14px;border-radius:var(--r12);font-size:.8rem;text-align:left;width:100%">
         ⏳ Waiting for vendor to accept<br>🛵 Carrier will be assigned automatically
       </div>
-      <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--o)">₹${newOrder.total} · ${newOrder.payment === 'cod' ? 'Cash on Delivery' : 'UPI'}</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--o)">₹${newOrder.total} · 💵 ${T('cod')}</div>
       <button class="add-btn" onclick="setSection('myorders');goBack()" style="margin-top:8px">📦 Track Order</button>
     </div>`;
-  toast(`🎉 Order ${newOrder.id} placed! Vendor will accept shortly`, 'green');
+  toast(`🎉 Order ${newOrder.id} placed!`, 'green');
+}
+
+/* Show retry/SMS fallback when latency >10s */
+function showLatencyFallback(order) {
+  closeM('checkoutModal');
+  toast('⚠️ Slow connection detected', 'orange');
+  const p = document.getElementById('cartPanel');
+  if (p) p.innerHTML = `
+    <div class="success-box">
+      <div style="font-size:2.5rem;margin-bottom:10px">⏳</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800">Connection Slow</div>
+      <div style="font-size:.82rem;color:var(--gy);margin-bottom:12px">Your order has been saved locally. Choose how to proceed:</div>
+      <button class="btn-auth" onclick="retryOrderSync('${order.id}')" style="margin-bottom:8px">${T('retry')}</button>
+      <button class="btn-auth" onclick="orderViaSMS('${order.id}')" style="background:var(--b);box-shadow:0 5px 16px rgba(24,90,219,.25)">${T('order_via_sms')}</button>
+    </div>`;
+  DB.cart = []; saveDB(); updateCartBadges(); updateFloatCart();
+}
+
+async function retryOrderSync(oid) {
+  toast('Retrying...', 'blue');
+  await syncPendingOrders();
+}
+
+function orderViaSMS(oid) {
+  getPendingOrders().then(orders => {
+    const o = orders.find(x => x.id === oid);
+    if (o) {
+      const msg = `LocalMart Order: ${o.items.map(i => i.name + '×' + i.qty).join(', ')} | ₹${o.total} COD | ${o.address} | ${o.phone}`;
+      triggerSMS('+919876543210', msg); // Fallback to support number
+    }
+  });
 }
 
 // ─── Booking (Services) ───
@@ -388,21 +448,18 @@ function confirmBooking() {
     declineReason: '',
   };
   if (db) Object.assign(req, { createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-
   if (db) db.collection("serviceRequests").doc(req.id).set(req);
   else DB.serviceRequests.push(req);
-  
   if (!db) saveDB();
-  
   closeM('bookModal');
-  toast(bkType === 'now' ? `⚡ ${v.bizName} notified! Arriving in ~15 min` : `📅 Booked for ${req.scheduledDate} at ${req.scheduledTime}`, 'blue');
+  toast(bkType === 'now' ? `⚡ ${v.bizName} notified! ~15 min` : `📅 Booked for ${req.scheduledDate} at ${req.scheduledTime}`, 'blue');
 }
 
 // ─── Cart Modal (Mobile) ───
 function openCartModal() {
   const b = document.getElementById('cartModalBody');
   if (!DB.cart.length) {
-    b.innerHTML = `<div style="text-align:center;padding:40px;color:var(--gy)"><div style="font-size:2.5rem;margin-bottom:12px">🛒</div>Cart is empty</div>`;
+    b.innerHTML = `<div style="text-align:center;padding:40px;color:var(--gy)"><div style="font-size:2.5rem;margin-bottom:12px">🛒</div>${T('cart_empty')}</div>`;
   } else {
     const sub = DB.cart.reduce((s, x) => s + x.price * x.qty, 0);
     const v = DB.users.find(u => u.id === DB.cart[0]?.shopId);
@@ -416,7 +473,8 @@ function openCartModal() {
       <div class="cs-row"><span>Subtotal</span><span>₹${sub}</span></div>
       ${v?.type !== 'service' ? `<div class="cs-row"><span>Delivery</span><span>${del ? '₹' + del : 'Free'}</span></div>` : ''}
       <div class="cs-total"><span>Total</span><span>₹${sub + del}</span></div>
-      <button class="checkout-btn" onclick="closeM('cartModal');openCheckout()">Checkout →</button>
+      <div style="font-size:.74rem;color:var(--gl);margin-bottom:8px">💵 ${T('cod')}</div>
+      <button class="checkout-btn" onclick="closeM('cartModal');openCheckout()">${T('checkout')}</button>
     </div>`;
   }
   document.getElementById('cartModal').classList.remove('hidden');
@@ -424,7 +482,6 @@ function openCartModal() {
 
 // ─── Help / FAQ ───
 let helpFrom = 'cust';
-
 function showHelp(from) { helpFrom = from; hideAll(); show('helpScreen'); renderFAQ(); }
 
 function renderFAQ() {

@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════════════════════
    LocalMart — Customer View Styles
    ═══════════════════════════════════════════════════════ */
-
 /* ─── Customer Top Bar ─── */
 .ctop { position: sticky; top: 0; z-index: 100; background: rgba(253,248,242,.95); backdrop-filter: blur(14px);
   border-bottom: 1.5px solid var(--lt); }
@@ -21,7 +20,6 @@
 .cart-btn:hover { transform: translateY(-1px); }
 .cbadge { background: #fff; color: var(--o); font-size: .62rem; font-weight: 800; width: 15px; height: 15px;
   border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-
 /* Section tabs */
 .sec-tabs { display: flex; overflow-x: auto; padding: 0 14px; border-bottom: 2px solid var(--lt); }
 @media(min-width:768px) { .sec-tabs { padding: 0 26px; } }
@@ -30,7 +28,6 @@
   color: var(--gy); border: none; background: none; cursor: pointer; white-space: nowrap;
   border-bottom: 2.5px solid transparent; margin-bottom: -2px; transition: all .2s; }
 .stab.act { color: var(--o); border-bottom-color: var(--o); }
-
 /* ─── Home Grid ─── */
 .home-body { display: grid; grid-template-columns: 1fr; }
 @media(min-width:1024px) { .home-body { grid-template-columns: 290px 1fr; } }
@@ -49,14 +46,12 @@
 .mvi-ic { width: 30px; height: 30px; border-radius: var(--r8); display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; }
 .mvi-nm { font-weight: 600; font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mvi-sub { font-size: .63rem; color: var(--gy); margin-top: 1px; }
-
 .grid-wrap { padding: 16px 14px; padding-bottom: calc(var(--bnh) + 14px); }
 @media(min-width:768px) { .grid-wrap { padding: 20px 26px 20px; } }
 .cg-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .76rem;
   color: var(--gy); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 13px; }
 .cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 10px; }
 @media(min-width:500px) { .cgrid { grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 13px; } }
-
 /* ─── Shop Card ─── */
 .scard { background: #fff; border-radius: var(--r20); overflow: hidden; border: 1.5px solid var(--lt);
   cursor: pointer; transition: all .23s; }
@@ -80,7 +75,6 @@
 .sc-badge { font-size: .63rem; margin-top: 5px; padding: 2px 8px; border-radius: var(--r100); display: inline-block; }
 .sb-shop { background: var(--og); color: var(--o); } .sb-food { background: var(--fg); color: var(--f); }
 .sb-svc { background: var(--bg); color: var(--b); } .sb-closed { background: var(--lt2); color: var(--gy); }
-
 /* ─── Detail Page ─── */
 #detailScreen { min-height: 100vh; background: var(--cr); }
 .dtop { position: sticky; top: 0; z-index: 100; background: rgba(253,248,242,.95); backdrop-filter: blur(14px);
@@ -124,7 +118,6 @@
 .book-later-btn { padding: 7px 12px; border-radius: var(--r100); background: var(--bg); color: var(--bl); border: none;
   cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .72rem; transition: all .17s; flex-shrink: 0; }
 .book-now-btn:hover, .book-later-btn:hover { transform: scale(1.04); }
-
 /* ─── Cart Side Panel ─── */
 .d-cart { border-left: 1.5px solid var(--lt); padding: 18px; position: sticky; top: var(--nh);
   height: calc(100vh - var(--nh)); display: none; flex-direction: column; }
@@ -148,7 +141,6 @@
   cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .88rem;
   box-shadow: 0 4px 12px rgba(26,107,60,.2); transition: all .2s; }
 .checkout-btn:hover { transform: translateY(-1px); }
-
 /* ─── Float Cart (Mobile) ─── */
 .float-cart { position: fixed; bottom: calc(var(--bnh) + 10px); left: 50%; transform: translateX(-50%); z-index: 150;
   background: var(--g); color: #fff; border: none; cursor: pointer; padding: 11px 24px;

@@ -1,8 +1,8 @@
-// ═══════════════════════════════════════════════════════
-// LocalMart — Authentication (Firebase Auth)
-// ═══════════════════════════════════════════════════════
+// LocalMart — Auth (Dual Login + Admin)
 
 let signupRole = 'vendor';
+let loginMode = 'email'; // 'email' or 'phone'
+let _loginRouting = false; // guard: prevents onAuthStateChanged from double-routing
 
 function switchTab(tab) {
   document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
@@ -22,11 +22,51 @@ function pickRole(role) {
   document.getElementById('bizFields').classList.toggle('hidden', role === 'customer' || role === 'carrier');
 }
 
-/** Quick login from demo buttons */
-function ql(email, pass) {
-  document.getElementById('liEmail').value = email;
-  document.getElementById('liPass').value = pass;
-  doLogin();
+/* Toggle between Email and Phone login */
+function toggleLoginMode() {
+  loginMode = loginMode === 'email' ? 'phone' : 'email';
+  document.getElementById('emailLoginFields').classList.toggle('hidden', loginMode !== 'email');
+  document.getElementById('phoneLoginFields').classList.toggle('hidden', loginMode !== 'phone');
+  document.getElementById('loginModeBtn').textContent = loginMode === 'email' ? T('login_phone') : T('login_email');
+}
+
+/* Phone + OTP login (simulated for demo — real OTP needs Firebase Blaze plan) */
+async function sendOTP() {
+  const phone = document.getElementById('liPhone').value.trim();
+  const err = document.getElementById('loginErr');
+  if (!phone || phone.length < 10) { err.textContent = 'Enter valid phone number.'; err.classList.remove('hidden'); return; }
+  // Simulated OTP — in production, use firebase.auth().signInWithPhoneNumber()
+  document.getElementById('otpSection').classList.remove('hidden');
+  toast('📱 OTP sent to ' + phone + ' (Demo: use 123456)', 'blue');
+}
+
+async function verifyOTP() {
+  const phone = document.getElementById('liPhone').value.trim();
+  const otp = document.getElementById('liOTP').value.trim();
+  const err = document.getElementById('loginErr');
+  if (otp !== '123456') { err.textContent = 'Invalid OTP. Demo OTP: 123456'; err.classList.remove('hidden'); return; }
+  // Find user by phone or create new one
+  try {
+    const snap = await db.collection('users').where('phone', '==', phone).limit(1).get();
+    if (!snap.empty) {
+      const udata = snap.docs[0].data();
+      // Try to sign in with stored email/pass, or create a temp auth
+      try {
+        const ac = await auth.signInWithEmailAndPassword(udata.email, udata.password);
+        checkAndRouteUser(ac.user.uid);
+      } catch(e) {
+        try {
+          const ac = await auth.createUserWithEmailAndPassword(udata.email, udata.password);
+          await db.collection('users').doc(ac.user.uid).set({...udata, id: ac.user.uid});
+          if (snap.docs[0].id !== ac.user.uid) await db.collection('users').doc(snap.docs[0].id).delete();
+          checkAndRouteUser(ac.user.uid);
+        } catch(e2) { err.textContent = 'Login failed: ' + e2.message; err.classList.remove('hidden'); }
+      }
+    } else {
+      err.textContent = 'No account found with this phone. Please sign up first.';
+      err.classList.remove('hidden');
+    }
+  } catch(e) { err.textContent = e.message; err.classList.remove('hidden'); }
 }
 
 async function doLogin() {
@@ -34,42 +74,32 @@ async function doLogin() {
   const pass = document.getElementById('liPass').value;
   const err = document.getElementById('loginErr');
   err.classList.add('hidden');
-
   if (!email || !pass) { err.textContent = 'Enter email and password.'; err.classList.remove('hidden'); return; }
-
+  function directRoute(uid, d) { _loginRouting=true; DB.currentUser=uid; saveLocalState(); if(!DB.users.find(u=>u.id===uid)) DB.users.push({...d,id:uid}); loadApp({...d,id:uid}); }
   try {
-    let authUser = await auth.signInWithEmailAndPassword(email, pass);
-    checkAndRouteUser(authUser.user.uid);
-  } catch (error) {
-    // If login fails (user doesn't exist, invalid credentials, etc.), check if they exist in our DEMOS Firestore array
-    try {
-      const userRef = await db.collection("users").where("email", "==", email).where("password", "==", pass).get();
-      if (!userRef.empty) {
-        let udata = userRef.docs[0].data();
-        let oldDocId = userRef.docs[0].id;
-        try {
-          let newAuth = await auth.createUserWithEmailAndPassword(email, pass);
-          // Migrate old Firestore doc to the new Auth UID
-          if (oldDocId !== newAuth.user.uid) {
-            await db.collection("users").doc(newAuth.user.uid).set(udata);
-            await db.collection("users").doc(oldDocId).delete();
-          }
-          await db.collection("users").doc(newAuth.user.uid).update({ id: newAuth.user.uid });
-          checkAndRouteUser(newAuth.user.uid);
-          return; // Stop here, login successful
-        } catch(signupErr) {
-          console.error("Auto-signup failed:", signupErr);
-        }
+    const ac = await auth.signInWithEmailAndPassword(email, pass), uid = ac.user.uid;
+    let ud = DB.users.find(u=>u.id===uid);
+    if (!ud && db) { const d = await db.collection('users').doc(uid).get(); if(d.exists) ud={id:uid,...d.data()}; }
+    if (!ud) ud = DB.users.find(u=>u.email===email);
+    if (ud) { directRoute(uid,ud); return; }
+    if (email==='admin@localmart.in') { directRoute(uid,{email,role:'admin',fname:'Super',lname:'Admin'}); return; }
+    checkAndRouteUser(uid); return;
+  } catch(e1) {}
+  try {
+    const snap = await db.collection("users").where("email","==",email).limit(1).get();
+    if (!snap.empty) {
+      const ud = snap.docs[0].data(), oid = snap.docs[0].id;
+      if (ud.password !== pass) { err.textContent='Email or password is incorrect.'; err.classList.remove('hidden'); return; }
+      try {
+        const na = await auth.createUserWithEmailAndPassword(email,pass), nid = na.user.uid;
+        if (oid!==nid) { await db.collection("users").doc(nid).set({...ud,id:nid}); await db.collection("users").doc(oid).delete().catch(()=>{}); }
+        directRoute(nid,ud); return;
+      } catch(e2) {
+        if (e2.code==='auth/email-already-in-use') { try { const ra=await auth.signInWithEmailAndPassword(email,ud.password); directRoute(ra.user.uid,ud); return; } catch(e3){} }
       }
-    } catch(dbErr) {
-      console.error("Firestore lookup failed during login:", dbErr);
     }
-    
-    // If we're here, it means auto-signup didn't occur or failed
-    console.error("Login failed:", error);
-    err.textContent = 'Email or password is incorrect.'; 
-    err.classList.remove('hidden');
-  }
+  } catch(e) {}
+  err.textContent = 'Email or password is incorrect.'; err.classList.remove('hidden');
 }
 
 async function doSignup() {
@@ -90,11 +120,11 @@ async function doSignup() {
 
     let finalRole = 'vendor';
     if (signupRole === 'customer') finalRole = 'customer';
-    if (signupRole === 'carrier') finalRole = 'rider'; // The app maps carrier to rider under the hood
+    if (signupRole === 'carrier') finalRole = 'rider';
 
-    const nu = { 
-      id: uid, email, password: pass, 
-      role: finalRole, 
+    const nu = {
+      id: uid, email, password: pass,
+      role: finalRole,
       fname, lname, phone,
       mapX: 40 + Math.random() * 220,
       mapY: 20 + Math.random() * 160
@@ -114,8 +144,7 @@ async function doSignup() {
     }
 
     await db.collection("users").doc(uid).set(nu);
-    
-    toast('Welcome to LocalMart! 🎉'); 
+    toast('LocalMart में स्वागत है! 🎉');
     checkAndRouteUser(uid);
   } catch (error) {
     err.textContent = error.message;
@@ -124,43 +153,48 @@ async function doSignup() {
 }
 
 async function checkAndRouteUser(uid) {
-  DB.currentUser = uid;
-  saveLocalState();
-  let user = DB.users.find(u => u.id === uid);
-  // Race condition: if login completes before initial onSnapshot finishes, explicitly fetch user
-  if (!user && db) {
-    try {
-      const doc = await db.collection('users').doc(uid).get();
-      if (doc.exists) user = { id: doc.id, ...doc.data() };
-    } catch(e) {}
-  }
-  if (user) loadApp(user);
-  else console.error("Could not route user, user data not found for UID:", uid);
+  DB.currentUser = uid; saveLocalState();
+  let u = DB.users.find(x => x.id === uid);
+  if (!u && db) { try { const d = await db.collection('users').doc(uid).get(); if (d.exists) { u = {id:d.id,...d.data()}; DB.users.push(u); } } catch(e){} }
+  if (!u) { const ae = auth.currentUser?.email; if (ae) { u = DB.users.find(x => x.email === ae); if (u && u.id !== uid) { u.id = uid; if (db) { db.collection('users').doc(uid).set({...u,id:uid}); db.collection('users').doc(u.id).delete().catch(()=>{}); } } } }
+  if (u) loadApp(u);
 }
 
 function loadApp(user) {
   hideAll();
+  // Check admin: either by email or role
+  if (isAdmin(user) || user.role === 'admin') { show('adminScreen'); initAdmin(); return; }
   if (user.role === 'vendor') { show('dashScreen'); initDash(user); }
   else if (user.role === 'rider') { show('riderScreen'); initRider(user); }
   else { show('custScreen'); initHome(); }
 }
 
-function signOut() { 
+function signOut() {
   auth.signOut();
-  DB.currentUser = null; 
-  DB.cart = []; 
-  saveLocalState(); 
-  hideAll(); 
-  show('authScreen'); 
+  DB.currentUser = null;
+  DB.cart = [];
+  saveLocalState();
+  hideAll();
+  show('authScreen');
+  logAudit('sign_out', DB.currentUser || 'unknown', 'User signed out');
 }
 
 // ─── Firebase Auth State Observer ───
 auth.onAuthStateChanged((user) => {
+  if (_loginRouting) return; // login is handling routing directly
   if (user) {
-    if (DB.users.length) checkAndRouteUser(user.uid);
-    else {
-      // If DB array hasn't loaded yet, try explicitly
-      checkAndRouteUser(user.uid);
-    }
+    checkAndRouteUser(user.uid);
   }
 });
+
+// ─── Role Switcher (Customer ↔ Carrier) ───
+function switchRole() {
+  const u = getCU(); if (!u) return;
+  if (document.getElementById('riderScreen') && !document.getElementById('riderScreen').classList.contains('hidden')) {
+    // Currently carrier → switch to customer
+    exitCarrierMode();
+  } else {
+    // Switch to carrier
+    switchToCarrierMode();
+  }
+}
