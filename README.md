@@ -209,3 +209,13 @@ open http://localhost:8080
 ## 📜 License
 
 MIT © 2026 LocalMart
+
+<div align="center">
+
+## 👤 Author
+
+Built by **Rishabh** — B.E. ECE, BITS Pilani Dubai Campus  
+Project developed as part of independent startup exploration, 2026.
+
+
+</div>
