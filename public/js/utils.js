@@ -73,28 +73,42 @@ function statusLabel(s) {
   return m[s] || s;
 }
 
-// ═══ WhatsApp / SMS Communication Layer ═══
+// ═══ WhatsApp / SMS Communication Layer (with Audit) ═══
+
+/** Log communication attempt to audit trail */
+function logComm(type, phone, message, success = true) {
+  const status = success ? 'sent' : 'failed';
+  logAudit(`${type}_${status}`, phone, message.slice(0, 120));
+}
 
 /** Trigger WhatsApp deep link (works on mobile + desktop) */
 function triggerWhatsApp(phone, message) {
-  // Clean phone number: remove spaces, ensure country code
-  let p = phone.replace(/[\s\-\(\)]/g, '');
-  if (p.startsWith('0')) p = '91' + p.slice(1);
-  if (!p.startsWith('91') && !p.startsWith('+91')) p = '91' + p;
-  p = p.replace('+', '');
-  const url = `https://wa.me/${p}?text=${encodeURIComponent(message)}`;
-  window.open(url, '_blank');
-  logAudit('whatsapp_sent', p, message.slice(0, 80));
+  try {
+    let p = phone.replace(/[\s\-\(\)]/g, '');
+    if (p.startsWith('0')) p = '91' + p.slice(1);
+    if (!p.startsWith('91') && !p.startsWith('+91')) p = '91' + p;
+    p = p.replace('+', '');
+    const url = `https://wa.me/${p}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+    logComm('whatsapp', p, message, true);
+  } catch (e) {
+    console.error('WhatsApp trigger failed:', e);
+    logComm('whatsapp', phone, message + ' [ERROR: ' + e.message + ']', false);
+  }
 }
 
 /** Trigger SMS via URI scheme (mobile fallback) */
 function triggerSMS(phone, message) {
-  let p = phone.replace(/[\s\-\(\)]/g, '');
-  if (!p.startsWith('+')) p = '+91' + (p.startsWith('91') ? p.slice(2) : p);
-  // Use sms: URI — works on iOS and Android
-  const url = `sms:${p}?body=${encodeURIComponent(message)}`;
-  window.open(url, '_blank');
-  logAudit('sms_sent', p, message.slice(0, 80));
+  try {
+    let p = phone.replace(/[\s\-\(\)]/g, '');
+    if (!p.startsWith('+')) p = '+91' + (p.startsWith('91') ? p.slice(2) : p);
+    const url = `sms:${p}?body=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+    logComm('sms', p, message, true);
+  } catch (e) {
+    console.error('SMS trigger failed:', e);
+    logComm('sms', phone, message + ' [ERROR: ' + e.message + ']', false);
+  }
 }
 
 // ═══ Image Compression (Canvas-based, for 2G/3G) ═══

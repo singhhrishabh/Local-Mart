@@ -479,6 +479,63 @@
     <div class="m-foot"><button class="btn-can" onclick="closeM('declineModal')" data-i18n="cancel">Cancel</button><button class="btn-sv" style="background:var(--rd)" onclick="confirmDecline()">Decline</button></div>
   </div>
 </div>
+<!-- Admin: Add User Modal -->
+<div class="mover hidden" id="adminAddUserModal">
+  <div class="mbox">
+    <div class="m-hd"><div class="m-title" id="aAddTitle">Add User</div><button class="m-close" onclick="closeM('adminAddUserModal')">✕</button></div>
+    <input type="hidden" id="aAddRole" value="vendor">
+    <div class="fr">
+      <div class="fg"><label>First Name</label><input type="text" id="aAddFn" placeholder="Ramesh"/></div>
+      <div class="fg"><label>Last Name</label><input type="text" id="aAddLn" placeholder="Sharma"/></div>
+    </div>
+    <div class="fg"><label>Email</label><input type="email" id="aAddEmail" placeholder="user@mail.com"/></div>
+    <div class="fg"><label>Phone</label><input type="tel" id="aAddPhone" placeholder="+91 98765 43210"/></div>
+    <div class="fg"><label>Password</label><input type="text" id="aAddPass" placeholder="pass123"/></div>
+    <div id="aAddBizFields">
+      <div class="fg"><label>Business Name</label><input type="text" id="aAddBizName" placeholder="Shop name"/></div>
+      <div class="fg"><label>Category</label>
+        <select id="aAddCategory">
+          <option value="shop|🛒 Kirana">🛒 Kirana</option>
+          <option value="shop|🥦 Vegetables">🥦 Vegetables</option>
+          <option value="shop|🧴 Dairy">🧴 Dairy</option>
+          <option value="shop|👗 Clothing">👗 Clothing</option>
+          <option value="food|🍽️ Chaat">🍽️ Chaat</option>
+          <option value="food|🥐 Bakery">🥐 Bakery</option>
+          <option value="service|🔧 Plumbing">🔧 Plumbing</option>
+          <option value="service|⚡ Electrician">⚡ Electrician</option>
+          <option value="service|🧹 Maid">🧹 Maid</option>
+        </select>
+      </div>
+      <div class="fg"><label>Address</label><input type="text" id="aAddAddress" placeholder="Area, City"/></div>
+    </div>
+    <div class="m-foot"><button class="btn-can" onclick="closeM('adminAddUserModal')">Cancel</button><button class="btn-sv" onclick="adminSaveNewUser()">Create →</button></div>
+  </div>
+</div>
+<!-- Admin: Edit User Modal -->
+<div class="mover hidden" id="adminEditUserModal">
+  <div class="mbox">
+    <div class="m-hd"><div class="m-title" id="aEditTitle">Edit User</div><button class="m-close" onclick="closeM('adminEditUserModal')">✕</button></div>
+    <div class="fr">
+      <div class="fg"><label>First Name</label><input type="text" id="aEditFn"/></div>
+      <div class="fg"><label>Last Name</label><input type="text" id="aEditLn"/></div>
+    </div>
+    <div class="fg"><label>Email</label><input type="email" id="aEditEmail"/></div>
+    <div class="fg"><label>Phone</label><input type="tel" id="aEditPhone"/></div>
+    <div id="aEditBizFields">
+      <div class="fg"><label>Business Name</label><input type="text" id="aEditBizName"/></div>
+      <div class="fg"><label>Address</label><input type="text" id="aEditAddress"/></div>
+    </div>
+    <div class="m-foot"><button class="btn-can" onclick="closeM('adminEditUserModal')">Cancel</button><button class="btn-sv" onclick="adminSaveEditUser()">Save →</button></div>
+  </div>
+</div>
+<!-- Admin: Inventory Oversight Modal -->
+<div class="mover hidden" id="adminInventoryModal">
+  <div class="mbox" style="max-width:620px">
+    <div class="m-hd"><div class="m-title" id="aInvTitle">Inventory</div><button class="m-close" onclick="closeM('adminInventoryModal')">✕</button></div>
+    <div id="aInvList" style="max-height:60vh;overflow-y:auto"></div>
+    <div class="m-foot"><button class="btn-can" onclick="closeM('adminInventoryModal')">Close</button></div>
+  </div>
+</div>
 <!-- Toast -->
 <div id="toast"><div class="td" id="toastDot"></div><span id="toastMsg"></span></div>
 <!-- Firebase SDKs -->
@@ -487,18 +544,27 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <!-- Leaflet SDK -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- JS Modules (order matters) -->
-<script src="js/firebase-config.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/offline.js"></script>
-<script src="js/i18n.js"></script>
-<script src="js/data.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/map.js"></script>
-<script src="js/vendor.js"></script>
-<script src="js/carrier.js"></script>
-<script src="js/customer.js"></script>
-<script src="js/admin.js"></script>
-<script src="js/app.js"></script>
+<!-- JS Modules (order matters) — cache-busted v6 -->
+<script>
+  // Force unregister old service worker and clear caches
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(r => r.unregister());
+    });
+    caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
+  }
+</script>
+<script src="js/firebase-config.js?v=6"></script>
+<script src="js/utils.js?v=6"></script>
+<script src="js/offline.js?v=6"></script>
+<script src="js/i18n.js?v=6"></script>
+<script src="js/data.js?v=6"></script>
+<script src="js/auth.js?v=6"></script>
+<script src="js/map.js?v=6"></script>
+<script src="js/vendor.js?v=6"></script>
+<script src="js/carrier.js?v=6"></script>
+<script src="js/customer.js?v=6"></script>
+<script src="js/admin.js?v=6"></script>
+<script src="js/app.js?v=6"></script>
 </body>
 </html>

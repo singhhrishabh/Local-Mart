@@ -1,5 +1,5 @@
 // ═══ LocalMart Service Worker — Offline-First PWA ═══
-const CACHE = 'lm-v4';
+const CACHE = 'lm-v6';
 const ASSETS = ['/', '/index.html', '/css/variables.css', '/css/auth.css', '/css/layout.css', '/css/components.css', '/css/customer.css',
   '/js/firebase-config.js', '/js/utils.js', '/js/offline.js', '/js/i18n.js', '/js/data.js', '/js/auth.js', '/js/map.js', '/js/vendor.js', '/js/carrier.js', '/js/customer.js', '/js/admin.js', '/js/app.js'];
 

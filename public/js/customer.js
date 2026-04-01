@@ -30,7 +30,7 @@ function renderHome() {
   if (activeSection === 'shops') vendors = vendors.filter(v => v.type === 'shop');
   else if (activeSection === 'food') vendors = vendors.filter(v => v.type === 'food');
   if (activeSection === 'all') vendors = vendors.filter(v => v.type !== 'service');
-  if (search) vendors = vendors.filter(v => v.bizName?.toLowerCase().includes(search) || (v.items || []).some(i => i.name.toLowerCase().includes(search)));
+  if (search) vendors = vendors.filter(v => fuzzyMatch(v.bizName || '', search) || (v.items || []).some(i => fuzzyMatch(i.name, search)));
 
   document.getElementById('liveCnt').textContent = getLive().filter(v => v.type !== 'service').length + ' Live';
   renderMapSVG(); renderMapList();
@@ -69,7 +69,7 @@ function renderServicesPage(search = '') {
   document.getElementById('gridTitle').textContent = T('services').toUpperCase();
   document.getElementById('liveCnt').textContent = getLive().filter(v => v.type === 'service').length + ' Available';
   renderMapSVG(true); renderMapList(true);
-  const svcVendors = getVendors().filter(v => v.type === 'service' && (!search || v.bizName?.toLowerCase().includes(search)));
+  const svcVendors = getVendors().filter(v => v.type === 'service' && (!search || fuzzyMatch(v.bizName || '', search)));
   const bgs = ['#E3F2FD', '#EDE7F6', '#E8F5E9', '#FFF8E1', '#FCE4EC'];
   const grid = document.getElementById('mainGrid');
   const liveS = svcVendors.filter(v => v.isLive);
@@ -112,11 +112,13 @@ function renderMyOrders() {
     ...myOrders.map(o => {
       const rider = o.riderId ? DB.users.find(u => u.id === o.riderId) : null;
       const showTrack = o.status === 'picked_up';
+      const timeline = renderOrderTimeline(o.status);
       return `<div class="order-card" style="grid-column:1/-1;cursor:default">
         <div class="oc-top">
           <div><div class="oc-id">Order ${o.id}</div><div class="oc-cust">🏪 ${o.vendorName}</div></div>
           <div class="oc-status s-${o.status.replace(/_/g,'')}">${statusLabel(o.status)}</div>
         </div>
+        ${timeline}
         <div class="oc-items">${o.items.map(i => `${i.emoji} ${i.name} ×${i.qty}`).join(' · ')}</div>
         ${rider ? `<div style="font-size:.74rem;color:var(--bl);margin-bottom:8px">🛵 ${rider.fname} ${rider.lname} · ${rider.phone}</div>` : ''}
         ${showTrack ? `<div style="background:var(--bg);border-radius:var(--r12);padding:10px 12px;font-size:.8rem;color:var(--bl);margin-bottom:8px">📍 Live tracking: Carrier on the way!</div>` : ''}
@@ -298,6 +300,9 @@ function openCheckout() {
 }
 
 async function placeOrder() {
+  const u = getCU();
+  if (!u) { toast('Please sign in first', 'red'); signOut(); return; }
+
   const addr = document.getElementById('chkAddr').value.trim();
   const phone = document.getElementById('chkPhone').value.trim();
   if (!addr || !phone) { toast(T('delivery_addr') + ' & ' + T('phone') + ' required', 'red'); return; }
@@ -313,7 +318,6 @@ async function placeOrder() {
     if (!item || !item.avail) { toast(`${c.name} is no longer available`, 'red'); return; }
   }
 
-  const u = getCU();
   const isS = vendor.type === 'service';
   const sub = DB.cart.reduce((s, x) => s + x.price * x.qty, 0);
   const del = isS ? 0 : deliveryFeeForOrder(sub);
@@ -503,3 +507,63 @@ function goBackHelp() {
 }
 
 function goBack() { hide('detailScreen'); show('custScreen'); renderHome(); }
+
+// ─── Order Status Timeline ───
+function renderOrderTimeline(status) {
+  const steps = [
+    { key: 'placed', label: '📦 Placed', icon: '📦' },
+    { key: 'preparing', label: '👨‍🍳 Preparing', icon: '👨‍🍳' },
+    { key: 'out', label: '🛵 Out for Delivery', icon: '🛵' },
+    { key: 'delivered', label: '✅ Delivered', icon: '✅' }
+  ];
+  const statusMap = {
+    'pending': 0, 'vendor_accepted': 1, 'preparing': 1,
+    'rider_assigned': 2, 'picked_up': 2,
+    'delivered': 3, 'completed': 3
+  };
+  const activeIdx = statusMap[status] ?? 0;
+  const declined = ['declined', 'cancelled'].includes(status);
+  if (declined) return `<div style="text-align:center;padding:8px;color:var(--rd);font-size:.78rem;font-weight:600">❌ Order ${status}</div>`;
+  return `<div class="order-timeline" style="display:flex;align-items:center;gap:0;margin:10px 0;padding:0 8px">
+    ${steps.map((s, i) => {
+      const done = i <= activeIdx;
+      const active = i === activeIdx;
+      return `<div style="flex:1;text-align:center">
+        <div style="width:28px;height:28px;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:.8rem;
+          background:${done ? 'var(--og)' : '#e0e0e0'};color:${done ? '#fff' : '#999'};
+          ${active ? 'box-shadow:0 0 0 3px rgba(230,126,34,.3);transform:scale(1.15)' : ''}">
+          ${s.icon}
+        </div>
+        <div style="font-size:.58rem;color:${done ? 'var(--dk)' : '#aaa'};font-weight:${active ? '700' : '400'}">${s.label}</div>
+        ${i < steps.length - 1 ? '' : ''}
+      </div>`;
+    }).join(`<div style="flex:.3;height:2px;background:linear-gradient(90deg,var(--og),#e0e0e0);margin-bottom:18px"></div>`)}
+  </div>`;
+}
+
+// ─── Quick Chat Widget ───
+function openQuickChat(orderId) {
+  const msgs = QUICK_CHAT.map(c =>
+    `<button onclick="sendQuickMsg('${orderId}','${c.msg}')" style="
+      display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:6px;
+      border:1.5px solid var(--lt);border-radius:var(--r12);background:#fff;
+      cursor:pointer;font-size:.82rem;transition:all .2s"
+      onmouseover="this.style.background='var(--fg)'" onmouseout="this.style.background='#fff'">
+      ${c.label}
+    </button>`
+  ).join('');
+  document.getElementById('cartModalContent').innerHTML = `
+    <div style="padding:20px">
+      <h3 style="font-family:'Syne',sans-serif;margin-bottom:12px">💬 Quick Message</h3>
+      ${msgs}
+      <button onclick="closeM('cartModal')" style="margin-top:10px;width:100%;padding:10px;border:none;border-radius:var(--r12);background:var(--gy);color:#fff;cursor:pointer">Close</button>
+    </div>`;
+  document.getElementById('cartModal').classList.remove('hidden');
+}
+
+function sendQuickMsg(orderId, msg) {
+  toast('💬 ' + msg, 'blue');
+  closeM('cartModal');
+  logAudit('quick_chat', DB.currentUser, `Sent: "${msg}" for order ${orderId}`);
+}
+

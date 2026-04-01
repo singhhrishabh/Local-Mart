@@ -1,262 +1,211 @@
-# 📦 LocalMart — Local se Local | प्रतापगढ़ & जौनपुर
+# 🏪 LocalMart — Unified Marketplace Platform
 
-> **Your mohalla, now in your pocket.**  
-> Hyperlocal, offline-first marketplace connecting shops, street food stalls, home services, and package carriers — all within 2–4km. Built for Pratapgarh & Jaunpur.
+> A **local-first, offline-capable PWA** for hyperlocal commerce in Pratapgarh & Jaunpur. Vendors, food stalls, and service providers connect with customers through a real-time marketplace with carrier logistics.
+
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![Vanilla JS](https://img.shields.io/badge/Vanilla_JS-F7DF1E?style=flat&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![PWA](https://img.shields.io/badge/PWA-5A0FC8?style=flat&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
 
 ---
 
-## 🌐 Live Local Server
+## 🗂️ Architecture
 
-```bash
-http://localhost:8080
+```
+Local-Mart/
+├── public/
+│   ├── index.html          # Single-page app shell
+│   ├── manifest.json       # PWA manifest
+│   ├── sw.js               # Service Worker (offline-first)
+│   ├── css/
+│   │   ├── variables.css   # Design tokens
+│   │   ├── auth.css        # Login UI
+│   │   ├── layout.css      # Layout grid
+│   │   ├── components.css  # Reusable components
+│   │   └── customer.css    # Customer-specific styles
+│   └── js/
+│       ├── firebase-config.js  # Firebase init
+│       ├── data.js         # DEMOS, DB, fuzzy search, low-stock, batching
+│       ├── auth.js         # Hybrid login (Email + Phone OTP), lockout, RBAC
+│       ├── admin.js        # God-Mode admin dashboard
+│       ├── vendor.js       # Vendor/food/service dashboard
+│       ├── carrier.js      # Carrier delivery management
+│       ├── customer.js     # Customer browsing, cart, order timeline
+│       ├── map.js          # Leaflet map integration
+│       ├── i18n.js         # Hindi/English multilingual
+│       ├── offline.js      # IndexedDB offline queue
+│       ├── utils.js        # Shared helpers, WhatsApp/SMS triggers
+│       └── app.js          # App entry point
+└── README.md
 ```
 
-> The app runs entirely from a static file server. No Node.js backend needed.
-
 ---
 
-## 🧭 What is LocalMart?
+## 🔐 1. User Roles & Test Accounts
 
-LocalMart is a **lightweight (<200KB), offline-first PWA** that digitizes the local economy of Pratapgarh & Jaunpur — the sabziwala, kirana dukan, chaat bhandaar, plumber, and the uncle on a scooter going to the next village.
+### A. Vendors & Food Stalls (7 accounts)
+| Email | Password | Shop Type |
+|:---|:---|:---|
+| `gupta.dairy@mail.com` | `dairy123` | 🧴 Dairy Shop |
+| `sharma.bakery@mail.com` | `bakery123` | 🥐 Bakery |
+| `sharma.veg@mail.com` | `veg123` | 🥦 Vegetables |
+| `meena.saree@mail.com` | `saree123` | 👗 Clothing |
+| `raju.kachori@mail.com` | `kachori123` | 🍽️ Chaat/Food |
+| `royal.chaat@mail.com` | `chaat123` | 🍽️ Chaat/Food |
+| `pappu.kirana@mail.com` | `kirana123` | 🛒 Kirana Store |
 
-It operates on a strict **2–4km radius** — every order, every booking, every package is purely local.
-
-**Core motive: Local se Local.** No corporate middlemen. No dark stores. Just your neighbourhood, organized.
-
-### Key Constraints
-- 🎯 **Build size: ~196KB** (strict <200KB budget)
-- 💵 **Cash on Delivery only** (no UPI/QR — designed for rural trust model)
-- 📱 **Offline-first** — works without internet, syncs when online
-- 🌐 **Hindi default** — full bilingual support (Hindi/English)
-
----
-
-## 🚀 How to Run Locally
-
-No build step, no npm install, no Node backend. Just serve `public/`:
-
-```bash
-# Option 1: Python (recommended)
-cd public && python3 -m http.server 8080
-
-# Option 2: npx serve
-npx serve public/ -p 8080
-
-# Option 3: PHP
-cd public && php -S localhost:8080
-```
-
-Open **http://localhost:8080** in your browser.
-
-> **Note:** On first load, the app seeds demo data into Cloud Firestore automatically. Ensure you have internet connectivity for the initial setup.
-
----
-
-## 🔑 Login Credentials
-
-### 🛡️ Admin (God-Mode)
+### B. Logistics (Carriers)
 | Email | Password |
-|---|---|
-| `admin@localmart.in` | `admin123` |
-
-Full CRUD access to all vendors, customers, carriers, orders, and audit log.
-
-### 🏪 Vendors & Food Stalls
-| Email | Password | Type |
-|---|---|---|
-| `gupta.dairy@mail.com` | `dairy123` | Dairy Shop |
-| `sharma.bakery@mail.com` | `bakery123` | Bakery |
-| `sharma.veg@mail.com` | `veg123` | Vegetables |
-| `meena.saree@mail.com` | `saree123` | Clothing |
-| `raju.kachori@mail.com` | `kachori123` | Chaat/Food |
-| `royal.chaat@mail.com` | `chaat123` | Chaat/Food |
-| `pappu.kirana@mail.com` | `kirana123` | Kirana Store |
-
-### 📦 Carriers
-| Email | Password |
-|---|---|
+|:---|:---|
 | `rider1@mail.com` | `rider123` |
 | `rider2@mail.com` | `rider123` |
 
-### 🛒 Customers
+### C. Customers
 | Email | Password |
-|---|---|
+|:---|:---|
 | `customer@mail.com` | `customer123` |
 | `customer2@mail.com` | `customer123` |
 
-### 📱 Phone + OTP Login
-Toggle to "Phone + OTP" mode on the login screen. Demo OTP: **`123456`**
+### D. Admin (God-Mode)
+| Email | Password |
+|:---|:---|
+| `admin@localmart.in` | `admin123` |
 
 ---
 
-## 👥 User Roles
+## 🔒 2. Security & Authentication
 
-| Role | Who | What they do |
-|---|---|---|
-| 🛡️ **Admin** | Super Admin | Full CRUD, audit log, force-deliver, system health |
-| 🏪 **Vendor** | Sabziwala, kirana, saree shop | Lists products, goes live, accepts/declines orders |
-| 🍽️ **Food Stall** | Chaat bhandaar, kachori, bakery | Lists dishes, goes live, accepts food orders |
-| 🔧 **Service Provider** | Plumber, electrician, AC mechanic | Lists services, accepts/declines bookings |
-| 🛒 **Customer** | Anyone nearby | Browses, orders, books services, tracks delivery |
-| 📦 **Package Carrier** | Student, housewife, traveller | Picks packages on their route, earns delivery fee |
+### Hybrid Login System
+- **Email/Password**: Standard login with Firebase Auth
+- **Phone + OTP**: Toggle to phone mode, enter registered number, demo OTP: `123456`
+
+### Account Lockout
+- After **5 failed login attempts** → account locked for **5 minutes**
+- Warning shown after 3rd attempt: *"2 attempts remaining before lockout"*
+
+### Role-Based Access Control (RBAC)
+- `requireRole('vendor')` guard prevents customers from accessing vendor APIs
+- Admin has full visibility into all user types
+
+### Biometric Ready
+- Architecture supports WebAuthn/biometric prompt integration for mobile sessions
 
 ---
 
-## ✨ Features
+## 🎨 3. UX Enhancements
 
-### 🔄 Offline-First Engine
-- **IndexedDB** queues orders when offline → auto-syncs on reconnection
-- **Service Worker** caches all assets for instant load without internet
-- **Background Sync** pushes pending orders when connectivity restores
-- **Latency watchdog** detects slow connections and offers SMS fallback
+### Real-Time Tracking
+- **Leaflet Maps** integration showing vendor/carrier locations
+- Live tracking dot when carrier marks "Picked Up"
 
-### 🛡️ Admin God-Mode Dashboard
-- Real-time overview: vendors, customers, carriers, orders, live count
-- **Full CRUD** on all entities (create, edit, delete)
-- **Order lifecycle tracking**: Placed → Notified → Accepted → Carrying → Delivered
-- **Force-deliver** capability for stuck orders
-- **Audit log** with timestamped entries of all system activity
-- **System health**: Firebase status, offline DB, online/offline, region
+### Smart Fuzzy Search
+- Typo-tolerant search: *"Kachori"* → finds **"Raju Kachori Wala"**
+- 70% character match threshold using subsequence matching
+- Works across shop names and item names
 
-### 🌐 Bilingual (Hindi / English)
-- 80+ translatable strings via `data-i18n` attributes
-- **Language toggle on every screen** including the auth/login page
-- Hindi is the default language
-- One-click switch: `🌐 EN / हिं`
+### Multilingual UI
+- Toggle **EN/हिं** on every page (login, dashboards, customer)
+- Hindi translations for all UI labels, status messages, FAQs
 
-### 📱 Adaptive UI
-- **Mobile**: Bottom navigation bar, 56px touch targets, card-based layout
-- **Desktop**: Sidebar for admin/vendor, top nav for customer, grid layout
-- Responsive breakpoints at 768px and 1024px
+### Order Status Timeline
+Visual progress bar on every order:
+```
+📦 Placed → 👨‍🍳 Preparing → 🛵 Out for Delivery → ✅ Delivered
+```
+- Active step highlighted with glow effect
+- Declined orders show ❌ status
 
-### 🏪 Vendor Features
-- Live/offline toggle with "Opens in Xh Ym" countdown
-- Inventory CRUD with emoji, price, unit, stock status
-- **Image upload** with client-side Canvas compression (WebP, 300px, 60% quality)
-- **Smart decline**: reason required, customer gets SMS with alternative shop suggestion
-- **Safety toggle** for home service providers
-- Accept/reject orders from dashboard
+### Quick Chat
+Pre-defined message tags for Riders and Customers:
+- 📍 *I have arrived*
+- 🚪 *Leave at the gate*
+- ⏳ *On my way*
+- 📞 *Call me*
+- 🔔 *Order ready*
 
-### 📦 Carrier Wizard
-- **Step 1**: "Where are you heading?" — enter From/To
-- **Step 2**: Matching packages auto-shown based on route
-- SMS notifications on accept and deliver
-- Earnings tracking per delivery (₹40–₹80)
+---
 
-### 🛒 Customer Experience
-- **Live LeafletJS map** with shop markers and "YOU" dot
-- Search with **Hindi voice input** (Web Speech API, `hi-IN`)
-- Category tabs: All / Shops / Food / Services
-- Cart + COD-only checkout with unique order IDs (`LM-<timestamp>`)
-- Order history with status tracking
-- "Opens in Xh Ym" cards for closed shops
+## ⚙️ 4. Operational Features
 
-### 📡 Communication Layer
-- **WhatsApp** deep links (`wa.me/...`) for vendor-customer coordination
-- **SMS** triggers (`sms:...`) for order notifications and decline reasons
-- Fallback to SMS when internet is slow (latency watchdog)
+### Low-Stock Alerts
+- Automated toast notifications when inventory falls below **5 units**
+- Alerts shown on vendor login: *"⚠️ Low stock: 🌶️ Hari Mirch — only 3 left!"*
 
-### 🔐 Dual Login
-- **Email + Password** — standard login for all roles
-- **Phone + OTP** — simulated for demo (production requires Firebase Blaze plan)
-- **Sign Out** visible on every screen
+### Rider Batching Algorithm
+- Groups orders from the same vendor when delivery addresses share area keywords
+- Reduces delivery trips for orders within ~1km radius
+
+### Admin God-Mode Dashboard
+- **Full CRUD**: Add/Edit/Delete any Vendor, Customer, or Carrier
+- **Inventory Oversight**: View and manage any vendor's stock
+- **Live Status Tracking**: Online/Offline/On Delivery badges
+- **Communication Audit Log**: Tracks all WhatsApp/SMS triggers
+- **System Health**: Firebase status, total users, region info
+
+### Offline-First Architecture
+- **Service Worker** caches all assets for offline access
+- **IndexedDB** queues orders placed without internet
+- Auto-sync when connection restores via Background Sync API
+
+---
+
+## ✅ 5. QA Validation Checklist
+
+| Test | Expected | Status |
+|:---|:---|:---|
+| Login all 7 vendor accounts | Each reaches vendor dashboard | ✅ |
+| Login 2 rider accounts | Each reaches carrier dashboard | ✅ |
+| Login 2 customer accounts | Each reaches customer home | ✅ |
+| Admin login | God-Mode dashboard with all users visible | ✅ |
+| Phone + OTP (123456) | Authenticates registered phone numbers | ✅ |
+| Fuzzy search "Kachori" | Shows Raju Kachori Wala | ✅ |
+| Account lockout (5 fails) | Shows lockout message with timer | ✅ |
+| Low-stock alerts | Toast on vendor login for items ≤ 5 | ✅ |
+| Order timeline | Progress bar on customer order cards | ✅ |
+| Admin CRUD | Add/Edit/Delete users from admin panel | ✅ |
+| Offline mode | App loads without internet | ✅ |
+
+---
+
+## 🚀 Running Locally
+
+```bash
+# Clone the repo
+git clone https://github.com/singhhrishabh/Local-Mart.git
+cd Local-Mart/public
+
+# Serve with any static file server
+python3 -m http.server 8080
+# or
+npx serve .
+
+# Open in browser
+open http://localhost:8080
+```
 
 ---
 
 ## 🏗️ Tech Stack
 
 | Layer | Technology |
-|---|---|
-| Frontend | Vanilla HTML5 + CSS3 + Modular JS (ES6+) |
-| Backend | Real-time Firebase (Cloud Firestore & Auth) |
-| Offline | IndexedDB + Service Worker + Background Sync |
-| Maps | LeafletJS + OpenStreetMap + CARTO Tiles |
-| Fonts | Google Fonts — Syne (headings) + DM Sans (body) |
-| PWA | manifest.json + sw.js (cache-first strategy) |
-| Hosting | Any static file server (Python, npx serve, etc.) |
-| Region | Pratapgarh (25.8958°N, 81.9761°E) & Jaunpur |
+|:---|:---|
+| Frontend | Vanilla HTML/CSS/JS |
+| Backend | Firebase (Firestore + Auth) |
+| Maps | Leaflet.js |
+| Offline | Service Worker + IndexedDB |
+| Communication | WhatsApp/SMS deep links |
+| Payment | COD (Cash on Delivery) |
 
 ---
 
-## 🗂️ Project Structure
+## 📋 Key Design Decisions
 
-```
-public/
-  ├── index.html              ← Single-page app entry (all screens)
-  ├── manifest.json           ← PWA manifest (installable)
-  ├── sw.js                   ← Service Worker (offline cache)
-  ├── css/
-  │   ├── variables.css       ← Theme tokens, colors, animations
-  │   ├── auth.css            ← Login/signup modal styles
-  │   ├── layout.css          ← Grids, sidebar, bottom nav
-  │   ├── components.css      ← Buttons, cards, modals, toasts
-  │   └── customer.css        ← Customer-specific UI
-  └── js/
-      ├── firebase-config.js  ← Firebase project configuration
-      ├── data.js             ← Demo data seed + Firestore sync
-      ├── auth.js             ← Dual login (email/phone), admin routing
-      ├── i18n.js             ← Hindi/English translations (80+ strings)
-      ├── offline.js          ← IndexedDB queue + thumbnail cache
-      ├── admin.js            ← God-Mode dashboard (CRUD + audit)
-      ├── map.js              ← LeafletJS map engine (Pratapgarh coords)
-      ├── vendor.js           ← Shop inventory + smart decline
-      ├── carrier.js          ← 2-step wizard + route matching
-      ├── customer.js         ← Cart, checkout, latency watchdog
-      ├── utils.js            ← WhatsApp/SMS, image compression, voice
-      └── app.js              ← Root initialization + i18n apply
-firebase.json                 ← Firebase Hosting config
-firestore.rules               ← Firestore security rules
-```
-
-**Total build size: ~196KB** (19 files)
-
----
-
-## 🔮 Roadmap
-
-- [x] Real-time Firebase backend syncing
-- [x] Interactive GPS mapping (LeafletJS)
-- [x] Modular codebase architecture
-- [x] Route-declaration matching for carriers
-- [x] Offline-first with IndexedDB + Service Worker
-- [x] PWA installable (manifest.json)
-- [x] Admin God-Mode dashboard with audit log
-- [x] Hindi/English bilingual support (i18n)
-- [x] WhatsApp/SMS communication layer
-- [x] COD-only checkout
-- [x] Dual login (Email + Phone/OTP)
-- [x] Client-side image compression
-- [x] Voice search (Hindi)
-- [x] Smart vendor decline with alt-shop SMS
-- [x] Carrier 2-step wizard
-- [x] Adaptive UI (mobile/desktop)
-- [ ] Firebase Phone Auth on Blaze plan (production OTP)
-- [ ] Production Firestore security rules (role-based)
-- [ ] Push notifications (FCM)
-- [ ] Multi-region support (beyond Pratapgarh/Jaunpur)
-
----
-
-## ⚠️ Production Notes
-
-1. **Firebase Phone Auth** requires the Blaze (pay-as-you-go) plan. Currently uses simulated OTP (`123456`).
-2. **Firestore rules** are permissive for development. Tighten with role-based access before production deploy.
-3. **Service Worker** uses cache-first strategy. Bump the `CACHE` version in `sw.js` when deploying new code.
-4. **Admin detection** is email-based (`admin@localmart.in`). For production, use Firebase Custom Claims.
+1. **Local-First Data**: DEMOS array is always loaded first, Firestore enriches. This guarantees the app works even if Firebase is unreachable.
+2. **No Build Step**: Pure vanilla JS — no frameworks, no bundlers. Drop `public/` on any static host.
+3. **Cache Busting**: All JS files use `?v=6` query params; SW cache version `lm-v6` forces updates.
+4. **No 200KB Constraint**: Prioritized code readability, comprehensive features, and maintainability over bundle size.
 
 ---
 
 ## 📜 License
 
-MIT — Free to use, modify, and distribute. Attribution appreciated.
-
----
-
-## 👤 Author
-
-Built by **Rishabh** — B.E. ECE, BITS Pilani Dubai Campus  
-Project developed as part of independent startup showcase for Y-Combinator / Startup School (April 2026).
-
----
-
-*"The kirana store on your street deserves the same digital reach as Amazon. LocalMart is how we get there — offline-first, Hindi-first, local-first."*
+MIT © 2026 LocalMart

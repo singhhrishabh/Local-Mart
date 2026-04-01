@@ -1,117 +1,97 @@
-// LocalMart — Data Layer (Pratapgarh & Jaunpur)
+// ═══ LocalMart — Data Layer (Unified Marketplace Platform) ═══
 
 function ht(h) { const t = new Date(); t.setHours(t.getHours() + h); return t.toTimeString().slice(0, 5); }
 
-// Demo data seeded into Firestore for first-run (Pratapgarh & Jaunpur addresses)
+// Pre-registered test accounts (matches Unified Marketplace Credential Manifest)
 const DEMOS = [
-  // ─── VENDORS (Shops) ───
-  { id: 'v1', email: 'vendor.vegetable@mail.com', password: 'vegetable123', role: 'vendor', type: 'shop',
-    fname: 'Ramesh', lname: 'Sharma', phone: '9876543210', bizName: 'Sharma Fresh Sabzi',
-    category: 'shop|🥦 Vegetables', address: 'Bela, Pratapgarh', isLive: true, opensAt: '', mapX: 108, mapY: 72,
-    items: [
-      { id: 'i1', name: 'Palak', price: 20, unit: 'per 250g', emoji: '🥬', avail: true },
-      { id: 'i2', name: 'Tamatar', price: 30, unit: 'per kg', emoji: '🍅', avail: true },
-      { id: 'i3', name: 'Methi', price: 15, unit: 'per bunch', emoji: '🌿', avail: false },
-      { id: 'i4', name: 'Dhaniya', price: 10, unit: 'per bunch', emoji: '🌱', avail: true },
-      { id: 'i5', name: 'Hari Mirch', price: 20, unit: 'per 100g', emoji: '🌶️', avail: true }
-    ]
-  },
-  { id: 'v2', email: 'vendor.dairy@mail.com', password: 'dairy123', role: 'vendor', type: 'shop',
+  // ─── A. VENDORS & FOOD STALLS (7 accounts) ───
+  { id: 'v1', email: 'gupta.dairy@mail.com', password: 'dairy123', role: 'vendor', type: 'shop',
     fname: 'Suresh', lname: 'Gupta', phone: '9812345678', bizName: 'Gupta Dairy Fresh',
     category: 'shop|🧴 Dairy', address: 'Katra, Pratapgarh', isLive: true, opensAt: '', mapX: 200, mapY: 115,
     items: [
-      { id: 'd1', name: 'Full Fat Doodh', price: 60, unit: 'per litre', emoji: '🥛', avail: true },
-      { id: 'd2', name: 'Paneer', price: 120, unit: 'per 200g', emoji: '🧀', avail: true },
-      { id: 'd3', name: 'Dahi', price: 40, unit: 'per 400g', emoji: '🫙', avail: true },
-      { id: 'd4', name: 'Makhan', price: 55, unit: 'per 100g', emoji: '🧈', avail: false }
+      { id: 'd1', name: 'Full Fat Doodh', price: 60, unit: 'per litre', emoji: '🥛', avail: true, stock: 25 },
+      { id: 'd2', name: 'Paneer', price: 120, unit: 'per 200g', emoji: '🧀', avail: true, stock: 15 },
+      { id: 'd3', name: 'Dahi', price: 40, unit: 'per 400g', emoji: '🫙', avail: true, stock: 20 },
+      { id: 'd4', name: 'Makhan', price: 55, unit: 'per 100g', emoji: '🧈', avail: false, stock: 0 }
     ]
   },
-  { id: 'v3', email: 'vendor.kirana@mail.com', password: 'kirana123', role: 'vendor', type: 'shop',
+  { id: 'v2', email: 'sharma.bakery@mail.com', password: 'bakery123', role: 'vendor', type: 'food',
+    fname: 'Mohan', lname: 'Sharma', phone: '9765432100', bizName: 'Sharma Bakery & Sweets',
+    category: 'food|🥐 Bakery', address: 'Civil Lines, Pratapgarh', isLive: true, opensAt: '', mapX: 250, mapY: 58,
+    items: [
+      { id: 'b1', name: 'Fresh Bread', price: 40, unit: 'per loaf', emoji: '🍞', avail: true, stock: 30 },
+      { id: 'b2', name: 'Rusks', price: 35, unit: 'per pack', emoji: '🥐', avail: true, stock: 18 },
+      { id: 'b3', name: 'Gulab Jamun (6pcs)', price: 60, unit: 'per box', emoji: '🍮', avail: true, stock: 12 },
+      { id: 'b4', name: 'Cake Pastry', price: 80, unit: 'per piece', emoji: '🎂', avail: true, stock: 8 }
+    ]
+  },
+  { id: 'v3', email: 'sharma.veg@mail.com', password: 'veg123', role: 'vendor', type: 'shop',
+    fname: 'Ramesh', lname: 'Sharma', phone: '9876543210', bizName: 'Sharma Fresh Sabzi',
+    category: 'shop|🥦 Vegetables', address: 'Bela, Pratapgarh', isLive: true, opensAt: '', mapX: 108, mapY: 72,
+    items: [
+      { id: 'i1', name: 'Palak', price: 20, unit: 'per 250g', emoji: '🥬', avail: true, stock: 40 },
+      { id: 'i2', name: 'Tamatar', price: 30, unit: 'per kg', emoji: '🍅', avail: true, stock: 35 },
+      { id: 'i3', name: 'Methi', price: 15, unit: 'per bunch', emoji: '🌿', avail: false, stock: 0 },
+      { id: 'i4', name: 'Dhaniya', price: 10, unit: 'per bunch', emoji: '🌱', avail: true, stock: 50 },
+      { id: 'i5', name: 'Hari Mirch', price: 20, unit: 'per 100g', emoji: '🌶️', avail: true, stock: 3 }
+    ]
+  },
+  { id: 'v4', email: 'meena.saree@mail.com', password: 'saree123', role: 'vendor', type: 'shop',
+    fname: 'Meena', lname: 'Devi', phone: '9876001234', bizName: 'Meena Saree Collection',
+    category: 'shop|👗 Clothing', address: 'Sadar Bazaar, Pratapgarh', isLive: true, opensAt: '', mapX: 155, mapY: 148,
+    items: [
+      { id: 'cl1', name: 'Cotton Saree', price: 450, unit: 'per piece', emoji: '👗', avail: true, stock: 20 },
+      { id: 'cl2', name: 'Chikankari Kurta', price: 380, unit: 'per piece', emoji: '👘', avail: true, stock: 15 },
+      { id: 'cl3', name: 'Dupatta Set', price: 250, unit: 'per set', emoji: '🧣', avail: true, stock: 25 }
+    ]
+  },
+  { id: 'v5', email: 'raju.kachori@mail.com', password: 'kachori123', role: 'vendor', type: 'food',
+    fname: 'Raju', lname: 'Verma', phone: '9900112233', bizName: 'Raju Kachori Wala',
+    category: 'food|🍽️ Chaat', address: 'Bela Chauraha, Pratapgarh', isLive: true, opensAt: '', mapX: 62, mapY: 138,
+    items: [
+      { id: 'kc1', name: 'Kachori (2pcs)', price: 25, unit: 'per plate', emoji: '🥟', avail: true, stock: 60 },
+      { id: 'kc2', name: 'Samosa (2pcs)', price: 20, unit: 'per plate', emoji: '🔺', avail: true, stock: 50 },
+      { id: 'kc3', name: 'Jalebi', price: 30, unit: 'per 100g', emoji: '🍩', avail: true, stock: 4 },
+      { id: 'kc4', name: 'Aloo Tikki', price: 30, unit: 'per plate', emoji: '🥔', avail: true, stock: 40 }
+    ]
+  },
+  { id: 'v6', email: 'royal.chaat@mail.com', password: 'chaat123', role: 'vendor', type: 'food',
+    fname: 'Radhelal', lname: 'Singh', phone: '9988776655', bizName: 'Royal Chaat Bhandaar',
+    category: 'food|🍽️ Chaat', address: 'Machhlishahr, Jaunpur', isLive: true, opensAt: '', mapX: 218, mapY: 48,
+    items: [
+      { id: 'ch1', name: 'Gol Gappa (6pcs)', price: 20, unit: 'per plate', emoji: '🫧', avail: true, stock: 80 },
+      { id: 'ch2', name: 'Basket Chaat', price: 40, unit: 'per plate', emoji: '🥣', avail: true, stock: 30 },
+      { id: 'ch3', name: 'Bhel Puri', price: 30, unit: 'per plate', emoji: '🥙', avail: true, stock: 35 },
+      { id: 'ch4', name: 'Pav Bhaji', price: 50, unit: 'per plate', emoji: '🍛', avail: true, stock: 2 }
+    ]
+  },
+  { id: 'v7', email: 'pappu.kirana@mail.com', password: 'kirana123', role: 'vendor', type: 'shop',
     fname: 'Pappu', lname: 'Agarwal', phone: '9988001122', bizName: 'Pappu Kirana Store',
     category: 'shop|🛒 Kirana', address: 'Sadar Bazaar, Pratapgarh', isLive: false, opensAt: ht(1.5), mapX: 55, mapY: 155,
     items: [
-      { id: 'k1', name: 'Tata Namak 1kg', price: 22, unit: 'per pack', emoji: '🧂', avail: true },
-      { id: 'k2', name: 'Atta 5kg', price: 195, unit: 'per bag', emoji: '🌾', avail: true },
-      { id: 'k3', name: 'Maggi', price: 14, unit: 'per pack', emoji: '🍜', avail: true }
-    ]
-  },
-  // ─── FOOD VENDORS ───
-  { id: 'f1', email: 'food.chaat@mail.com', password: 'chaat123', role: 'vendor', type: 'food',
-    fname: 'Radhelal', lname: 'Verma', phone: '9876001234', bizName: 'Lala Chaat Bhandaar',
-    category: 'food|🍽️ Chaat', address: 'Bela Chauraha, Pratapgarh', isLive: true, opensAt: '', mapX: 155, mapY: 148,
-    items: [
-      { id: 'ch1', name: 'Gol Gappa (6pcs)', price: 20, unit: 'per plate', emoji: '🫧', avail: true },
-      { id: 'ch2', name: 'Basket Chaat', price: 40, unit: 'per plate', emoji: '🥣', avail: true },
-      { id: 'ch3', name: 'Aloo Tikki', price: 30, unit: 'per plate', emoji: '🥔', avail: true },
-      { id: 'ch4', name: 'Bhel Puri', price: 30, unit: 'per plate', emoji: '🥙', avail: true }
-    ]
-  },
-  { id: 'f3', email: 'food.bakery@mail.com', password: 'bakery123', role: 'vendor', type: 'food',
-    fname: 'Mohan', lname: 'Singh', phone: '9765432100', bizName: 'Singh Bakery & Sweets',
-    category: 'food|🥐 Bakery', address: 'Civil Lines, Pratapgarh', isLive: true, opensAt: '', mapX: 250, mapY: 58,
-    items: [
-      { id: 'b1', name: 'Fresh Bread', price: 40, unit: 'per loaf', emoji: '🍞', avail: true },
-      { id: 'b2', name: 'Rusks', price: 35, unit: 'per pack', emoji: '🥐', avail: true },
-      { id: 'b3', name: 'Gulab Jamun (6pcs)', price: 60, unit: 'per box', emoji: '🍮', avail: true },
-      { id: 'b4', name: 'Cake Pastry', price: 80, unit: 'per piece', emoji: '🎂', avail: true }
+      { id: 'k1', name: 'Tata Namak 1kg', price: 22, unit: 'per pack', emoji: '🧂', avail: true, stock: 100 },
+      { id: 'k2', name: 'Atta 5kg', price: 195, unit: 'per bag', emoji: '🌾', avail: true, stock: 28 },
+      { id: 'k3', name: 'Maggi', price: 14, unit: 'per pack', emoji: '🍜', avail: true, stock: 5 }
     ]
   },
 
-  // ─── SERVICE PROVIDERS ───
-  { id: 's1', email: 'service.plumbing@mail.com', password: 'plumbing123', role: 'vendor', type: 'service',
-    fname: 'Vikram', lname: 'Singh', phone: '9988776655', bizName: 'Vikram Plumbing Works',
-    category: 'service|🔧 Plumbing', address: 'Manikpur, Pratapgarh', isLive: true, opensAt: '', mapX: 62, mapY: 138,
-    items: [
-      { id: 'sv1', name: 'Pipe Leak Repair', price: 300, unit: 'per visit', emoji: '🔧', avail: true, desc: 'Fix any pipe leaks' },
-      { id: 'sv2', name: 'Tap Installation', price: 200, unit: 'per tap', emoji: '🚿', avail: true, desc: 'Install/replace taps' },
-      { id: 'sv3', name: 'Drain Cleaning', price: 400, unit: 'per drain', emoji: '🪣', avail: true, desc: 'Unclog drains' }
-    ]
-  },
-  { id: 's2', email: 'service.maid@mail.com', password: 'maid123', role: 'vendor', type: 'service',
-    fname: 'Savita', lname: 'Devi', phone: '8877665544', bizName: 'CleanHome Maid Services',
-    category: 'service|🧹 Maid', address: 'Lalganj, Pratapgarh', isLive: true, opensAt: '', mapX: 218, mapY: 48,
-    items: [
-      { id: 'm1', name: 'Daily Maid (2hrs)', price: 1500, unit: 'per month', emoji: '🧹', avail: true, desc: 'Subah 2 ghante/din' },
-      { id: 'm2', name: 'One-time Deep Clean', price: 800, unit: 'per session', emoji: '✨', avail: true, desc: 'Poora ghar saaf' }
-    ]
-  },
-  { id: 's3', email: 'service.ac@mail.com', password: 'ac123', role: 'vendor', type: 'service',
-    fname: 'Ravi', lname: 'Yadav', phone: '9900112233', bizName: 'Ravi CoolTech AC',
-    category: 'service|❄️ AC Service', address: 'Shahganj, Jaunpur', isLive: true, opensAt: '', mapX: 178, mapY: 170,
-    items: [
-      { id: 'ac1', name: 'AC Service (1 ton)', price: 500, unit: 'per AC', emoji: '❄️', avail: true, desc: 'Full clean & gas check' },
-      { id: 'ac2', name: 'AC Repair', price: 350, unit: 'per visit', emoji: '🔩', avail: true, desc: 'Diagnosis + basic repair' },
-      { id: 'ac3', name: 'AC Installation', price: 1500, unit: 'per unit', emoji: '🏗️', avail: true, desc: 'New AC fitting' }
-    ]
-  },
-  { id: 's4', email: 'service.electrician@mail.com', password: 'electrician123', role: 'vendor', type: 'service',
-    fname: 'Bijli', lname: 'Bhai', phone: '9988001122', bizName: 'Bijli Bhai Electrician',
-    category: 'service|⚡ Electrician', address: 'Kunda, Pratapgarh', isLive: false, opensAt: ht(1), mapX: 128, mapY: 35,
-    items: [
-      { id: 'e1', name: 'Switch Repair', price: 150, unit: 'per point', emoji: '🔌', avail: true, desc: 'Fix/replace switches' },
-      { id: 'e2', name: 'Fan Installation', price: 250, unit: 'per fan', emoji: '💨', avail: true, desc: 'Ceiling fan fitting' },
-      { id: 'e3', name: 'Wiring Work', price: 800, unit: 'per room', emoji: '⚡', avail: true, desc: 'New/repair wiring' }
-    ]
-  },
-  { id: 's5', email: 'service.dryclean@mail.com', password: 'dryclean123', role: 'vendor', type: 'service',
-    fname: 'Shubham', lname: 'Dhobhi', phone: '9876543000', bizName: 'Shubham Dry Cleaning',
-    category: 'service|👔 Dry Cleaning', address: 'Machhlishahr, Jaunpur', isLive: false, opensAt: ht(0.5), mapX: 285, mapY: 115,
-    items: [
-      { id: 'dc1', name: 'Shirt/T-Shirt', price: 40, unit: 'per piece', emoji: '👔', avail: true, desc: 'Dry clean + press' },
-      { id: 'dc2', name: 'Suit/Blazer', price: 200, unit: 'per piece', emoji: '🤵', avail: true, desc: 'Full dry cleaning' },
-      { id: 'dc3', name: 'Chikankari Kurta', price: 150, unit: 'per piece', emoji: '👗', avail: true, desc: 'Gentle dry clean' }
-    ]
-  },
+  // ─── B. LOGISTICS (Carriers) ───
+  { id: 'r1', email: 'rider1@mail.com', password: 'rider123', role: 'rider',
+    fname: 'Rahul', lname: 'Kumar', phone: '9111111111', isLive: false,
+    routeFrom: 'Bela', routeTo: 'Sadar Bazaar', mapX: 140, mapY: 100, earnings: 0, deliveries: 0 },
+  { id: 'r2', email: 'rider2@mail.com', password: 'rider123', role: 'rider',
+    fname: 'Amit', lname: 'Verma', phone: '9222222222', isLive: false,
+    routeFrom: 'Katra', routeTo: 'Civil Lines', mapX: 80, mapY: 60, earnings: 0, deliveries: 0 },
 
-  // ─── PACKAGE CARRIERS ───
-  { id: 'r1', email: 'carrier1@mail.com', password: 'carrier123', role: 'rider', fname: 'Rahul', lname: 'Kumar', phone: '9111111111', isLive: false, routeFrom: 'Bela', routeTo: 'Sadar Bazaar', mapX: 140, mapY: 100, earnings: 0, deliveries: 0 },
-  { id: 'r2', email: 'carrier2@mail.com', password: 'carrier123', role: 'rider', fname: 'Amit', lname: 'Verma', phone: '9222222222', isLive: false, routeFrom: 'Katra', routeTo: 'Civil Lines', mapX: 80, mapY: 60, earnings: 0, deliveries: 0 },
-  // ─── CUSTOMERS ───
-  { id: 'c1', email: 'customer@mail.com', password: 'customer123', role: 'customer', fname: 'Priya', lname: 'Mehta', phone: '9090909090' },
-  { id: 'c2', email: 'customer2@mail.com', password: 'customer123', role: 'customer', fname: 'Arjun', lname: 'Nair', phone: '9191919191' },
+  // ─── C. CUSTOMERS ───
+  { id: 'c1', email: 'customer@mail.com', password: 'customer123', role: 'customer',
+    fname: 'Priya', lname: 'Mehta', phone: '9090909090' },
+  { id: 'c2', email: 'customer2@mail.com', password: 'customer123', role: 'customer',
+    fname: 'Arjun', lname: 'Nair', phone: '9191919191' },
 
   // ─── ADMIN ───
-  { id: 'admin1', email: 'admin@localmart.in', password: 'admin123', role: 'admin', fname: 'Super', lname: 'Admin', phone: '9000000000' },
+  { id: 'admin1', email: 'admin@localmart.in', password: 'admin123', role: 'admin',
+    fname: 'Super', lname: 'Admin', phone: '9000000000' },
 ];
 
 const FAQS = [
@@ -123,20 +103,56 @@ const FAQS = [
   { q: 'भाषा कैसे बदलें?', a: 'ऊपर EN/हिं बटन दबाएँ — हिंदी और English दोनों में देखें।' },
 ];
 
+// Quick Chat pre-defined tags
+const QUICK_CHAT = [
+  { label: '📍 I have arrived', msg: 'I have arrived at the location' },
+  { label: '🚪 Leave at gate', msg: 'Please leave at the gate' },
+  { label: '⏳ On my way', msg: 'On my way, reaching in 5 mins' },
+  { label: '📞 Call me', msg: 'Please call me on my number' },
+  { label: '🔔 Order ready', msg: 'Your order is ready for pickup' },
+];
+
+// Low-stock threshold
+const LOW_STOCK_THRESHOLD = 5;
+
+// Account lockout tracker
+const _loginAttempts = {};
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes
+
+function isAccountLocked(email) {
+  const a = _loginAttempts[email];
+  if (!a) return false;
+  if (a.count >= MAX_LOGIN_ATTEMPTS && Date.now() - a.lastAttempt < LOCKOUT_DURATION) return true;
+  if (a.count >= MAX_LOGIN_ATTEMPTS && Date.now() - a.lastAttempt >= LOCKOUT_DURATION) { delete _loginAttempts[email]; return false; }
+  return false;
+}
+
+function recordLoginAttempt(email, success) {
+  if (success) { delete _loginAttempts[email]; return; }
+  if (!_loginAttempts[email]) _loginAttempts[email] = { count: 0, lastAttempt: 0 };
+  _loginAttempts[email].count++;
+  _loginAttempts[email].lastAttempt = Date.now();
+}
+
 // ═══════════════════════════════════════════════════════
-// DATABASE
+// DATABASE — LOCAL-FIRST ARCHITECTURE
+// DEMOS are ALWAYS loaded first, then Firestore enriches
 let DB = { users: [], orders: [], serviceRequests: [], currentUser: null, cart: [] };
 
 async function loadDB() {
+  // STEP 1: Always start with DEMOS (local-first — guarantees data is available)
+  DB.users = DEMOS.map(d => ({...d})); // deep-ish copy
+  console.log('[loadDB] Initialized with', DB.users.length, 'DEMO users');
+
   if (!db) {
-    console.warn("Firestore not available! Using ephemeral data only.");
-    DB.users = [...DEMOS];
+    console.warn("Firestore not available! Using local data only.");
     return;
   }
 
   // Load purely local state (cart, current user session)
   try {
-    const r = localStorage.getItem('lm5_localState');
+    const r = localStorage.getItem('lm6_localState');
     if (r) {
       const state = JSON.parse(r);
       DB.currentUser = state.currentUser;
@@ -144,51 +160,79 @@ async function loadDB() {
     }
   } catch (e) {}
 
-  // Seed if empty
-  const usersSnapshot = await db.collection("users").get();
-  if (usersSnapshot.empty) {
-    console.log("Seeding Firestore with Demo Data...");
-    for (const user of DEMOS) {
-      await db.collection("users").doc(user.id).set(user);
+  // Seed Firestore with demo users
+  try {
+    const usersSnapshot = await db.collection("users").get();
+    const existingEmails = new Set(usersSnapshot.docs.map(d => d.data().email));
+    console.log('[loadDB] Firestore has', usersSnapshot.size, 'users');
+
+    // Merge Firestore users into DB (add any non-demo users)
+    for (const doc of usersSnapshot.docs) {
+      const data = { id: doc.id, ...doc.data() };
+      const existing = DB.users.find(u => u.email === data.email);
+      if (existing) {
+        // Update demo user with Firestore data (preserves any edits)
+        Object.assign(existing, data);
+      } else {
+        DB.users.push(data);
+      }
     }
+
+    // Seed missing demo users to Firestore
+    for (const demo of DEMOS) {
+      if (!existingEmails.has(demo.email)) {
+        console.log('Seeding to Firestore:', demo.email);
+        db.collection("users").doc(demo.id).set(demo).catch(() => {});
+      }
+    }
+  } catch (e) {
+    console.error('[loadDB] Firestore read failed, using local data:', e.message);
   }
 
-  // Always ensure admin user exists (in case DB was seeded before admin was added)
-  const adminDemo = DEMOS.find(u => u.email === 'admin@localmart.in');
-  if (adminDemo) {
-    const adminSnap = await db.collection("users").where("email", "==", "admin@localmart.in").limit(1).get();
-    if (adminSnap.empty) {
-      console.log("Seeding admin user...");
-      await db.collection("users").doc(adminDemo.id).set(adminDemo);
-    }
-  }
+  // ─── Attach Live Listeners ───
+  try {
+    db.collection("users").onSnapshot((snapshot) => {
+      const firestoreUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Start with DEMOS, then merge Firestore data on top
+      const merged = DEMOS.map(d => ({...d}));
+      for (const fu of firestoreUsers) {
+        const idx = merged.findIndex(u => u.email === fu.email);
+        if (idx >= 0) Object.assign(merged[idx], fu);
+        else merged.push(fu);
+      }
+      DB.users = merged;
+      console.log('[onSnapshot] DB.users:', DB.users.length);
+      if (DB.currentUser) {
+        const freshMe = DB.users.find(u => u.id === DB.currentUser);
+        if (freshMe) maybeReRenderDash(freshMe.role);
+      }
+      if (document.getElementById('custScreen') && !document.getElementById('custScreen').classList.contains('hidden')) {
+        if (typeof renderHome === 'function') renderHome();
+      }
+      if (typeof adminLiveRefresh === 'function') adminLiveRefresh();
+    }, (error) => {
+      console.error('[onSnapshot] Users listener error:', error.message);
+    });
+  } catch(e) {}
 
-  // ─── Attach Listeners ───
-  db.collection("users").onSnapshot((snapshot) => {
-    DB.users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    if (DB.currentUser) {
-      const freshMe = DB.users.find(u => u.id === DB.currentUser);
-      if (freshMe) maybeReRenderDash(freshMe.role);
-    }
-    if (document.getElementById('custScreen') && !document.getElementById('custScreen').classList.contains('hidden')) {
-      if (typeof renderHome === 'function') renderHome();
-    }
-  });
+  try {
+    db.collection("orders").onSnapshot((snapshot) => {
+      DB.orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      if (DB.currentUser) triggerOrderUIRefresh();
+    }, () => {});
+  } catch(e) {}
 
-  db.collection("orders").onSnapshot((snapshot) => {
-    DB.orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    if (DB.currentUser) triggerOrderUIRefresh();
-  });
-
-  db.collection("serviceRequests").onSnapshot((snapshot) => {
-    DB.serviceRequests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    if (DB.currentUser) triggerOrderUIRefresh();
-  });
+  try {
+    db.collection("serviceRequests").onSnapshot((snapshot) => {
+      DB.serviceRequests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      if (DB.currentUser) triggerOrderUIRefresh();
+    }, () => {});
+  } catch(e) {}
 }
 
 function saveLocalState() {
   try {
-    localStorage.setItem('lm5_localState', JSON.stringify({
+    localStorage.setItem('lm6_localState', JSON.stringify({
       currentUser: DB.currentUser,
       cart: DB.cart
     }));
@@ -199,9 +243,7 @@ function saveDB() {
   saveLocalState();
   if (!db) return;
   const me = DB.users.find(u => u.id === DB.currentUser);
-  if (me) {
-    db.collection("users").doc(me.id).set(me, { merge: true }).catch(console.error);
-  }
+  if (me) db.collection("users").doc(me.id).set(me, { merge: true }).catch(console.error);
 }
 
 // ─── Helpers to refresh UI automatically
@@ -212,10 +254,7 @@ function triggerOrderUIRefresh() {
   if (me.role === 'vendor' && typeof renderVendorOrders === 'function') renderVendorOrders();
   if (me.role === 'customer' && typeof renderMyOrders === 'function' && activeSection === 'myorders') renderMyOrders();
   if (typeof refreshRiderPanels === 'function') refreshRiderPanels();
-  // Refresh admin if open
-  if (typeof isAdmin === 'function' && isAdmin(me) && !document.getElementById('adminScreen')?.classList.contains('hidden')) {
-    if (typeof renderAdminDash === 'function') renderAdminDash();
-  }
+  if (typeof adminLiveRefresh === 'function') adminLiveRefresh();
 }
 
 function maybeReRenderDash(role) {
@@ -233,6 +272,39 @@ function getVendors() { return DB.users.filter(u => u.role === 'vendor'); }
 function getLive() { return getVendors().filter(v => v.isLive); }
 function getRiders() { return DB.users.filter(u => u.role === 'rider'); }
 function getLiveRiders() { return getRiders().filter(r => r.isLive); }
+
+// ─── Fuzzy Search ───
+function fuzzyMatch(text, query) {
+  if (!query) return true;
+  const t = text.toLowerCase(), q = query.toLowerCase();
+  if (t.includes(q)) return true;
+  // Levenshtein-style: allow 1-2 char errors
+  let qi = 0;
+  for (let i = 0; i < t.length && qi < q.length; i++) {
+    if (t[i] === q[qi]) qi++;
+  }
+  return qi >= q.length * 0.7; // 70% match threshold
+}
+
+// ─── Low-Stock Alert Check ───
+function checkLowStock(vendor) {
+  if (!vendor || !vendor.items) return [];
+  return vendor.items.filter(i => i.avail && (i.stock || 0) <= LOW_STOCK_THRESHOLD && (i.stock || 0) > 0);
+}
+
+// ─── Rider Batching (group orders within 1km) ───
+function getBatchableOrders(vendorId) {
+  const pending = DB.orders.filter(o => o.vendorId === vendorId && o.status === 'vendor_accepted');
+  if (pending.length < 2) return [];
+  // Group by proximity (simplified: same area keyword)
+  const groups = {};
+  pending.forEach(o => {
+    const area = (o.address || '').split(',')[0].trim().toLowerCase() || 'unknown';
+    if (!groups[area]) groups[area] = [];
+    groups[area].push(o);
+  });
+  return Object.values(groups).filter(g => g.length >= 2);
+}
 
 function nearestRider(vendorId) {
   const vendor = DB.users.find(u => u.id === vendorId);

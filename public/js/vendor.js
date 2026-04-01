@@ -25,6 +25,16 @@ function initDash(user) {
 
   updateLiveUI(); updateDashStats(); showPanel('dashboard');
   setInterval(() => { if (getCU()?.id === u.id) updateOrderBadge(); }, 3000);
+
+  // Low-stock alerts
+  const lowItems = checkLowStock(u);
+  if (lowItems.length) {
+    setTimeout(() => {
+      lowItems.forEach(item => {
+        toast(`⚠️ Low stock: ${item.emoji} ${item.name} — only ${item.stock} left!`, 'orange');
+      });
+    }, 1500);
+  }
 }
 
 // ─── Live Toggle (with Safety Confirmation) ───
