@@ -230,8 +230,7 @@ function signOut() {
   DB.currentUser = null;
   DB.cart = [];
   saveLocalState();
-  hideAll();
-  show('authScreen');
+  window.location.reload();
 }
 
 // ─── Firebase Auth State Observer ───

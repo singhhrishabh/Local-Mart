@@ -168,10 +168,10 @@ Pre-defined message tags for Riders and Customers:
 
 ## 🚀 Live Deployment
 
-The platform is automatically deployed via GitHub Pages:
-**Live URL:** https://singhhrishabh.github.io/Local-Mart/
+The platform is officially deployed via Firebase Hosting:
+**Live URL:** https://localmart-lucknow.web.app/
 
-> **Note**: To enable the deployment on your repository, go to **Settings > Pages**, and set the Source to **GitHub Actions**. The provided `.github/workflows/gh-pages.yml` will handle the rest on every push to `main`.
+> **Note**: This deployment runs our optimized offline-first PWA backed by Realtime Firestore configuration.
 
 ---
 

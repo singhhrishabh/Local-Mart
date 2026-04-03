@@ -204,16 +204,20 @@ function submitSvcRequest() {
   if (matching.length) {
     matching.forEach(v => {
       const vReq = { ...req, id: 'req_' + Date.now() + '_' + v.id, vendorId: v.id };
-      if (db) Object.assign(vReq, { createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-      if (db) db.collection("serviceRequests").doc(vReq.id).set(vReq);
-      else DB.serviceRequests.push(vReq);
+      if (db) {
+        const fireReq = { ...vReq, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+        db.collection("serviceRequests").doc(vReq.id).set(fireReq);
+      }
+      DB.serviceRequests.unshift(vReq);
     });
     toast('Request sent to ' + matching.length + ' provider(s)! 📞', 'blue');
   } else {
     req.vendorId = null;
-    if (db) Object.assign(req, { createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    if (db) db.collection("serviceRequests").doc(req.id).set(req);
-    else DB.serviceRequests.push(req);
+    if (db) {
+      const fireReq = { ...req, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+      db.collection("serviceRequests").doc(req.id).set(fireReq);
+    }
+    DB.serviceRequests.unshift(req);
     toast('Request submitted! We\'ll find you a provider 📞', 'blue');
   }
   if (!db) saveDB();
@@ -333,8 +337,10 @@ async function placeOrder() {
   // Offline or Online?
   if (navigator.onLine && db) {
     try {
-      newOrder.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-      await withLatencyGuard(db.collection("orders").doc(newOrder.id).set(newOrder), 10000);
+      const firebaseOrder = { ...newOrder, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+      await withLatencyGuard(db.collection("orders").doc(newOrder.id).set(firebaseOrder), 10000);
+      DB.orders.unshift(newOrder); // Optimistic UI update
+      triggerOrderUIRefresh(); // Render immediately
       // WhatsApp notification to vendor
       if (vendor.phone) triggerWhatsApp(vendor.phone, `New Order ${newOrder.id}: ${newOrder.items.map(i => i.name + ' ×' + i.qty).join(', ')} | Total: ₹${newOrder.total} | Location: ${addr}`);
       logAudit('order_placed', newOrder.id, `Customer: ${u.fname}, Vendor: ${vendor.bizName}, ₹${newOrder.total}`);
