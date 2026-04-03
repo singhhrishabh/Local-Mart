@@ -166,7 +166,16 @@ Pre-defined message tags for Riders and Customers:
 
 ---
 
-## 🚀 Running Locally
+## 🚀 Live Deployment
+
+The platform is automatically deployed via GitHub Pages:
+**Live URL:** https://singhhrishabh.github.io/Local-Mart/
+
+> **Note**: To enable the deployment on your repository, go to **Settings > Pages**, and set the Source to **GitHub Actions**. The provided `.github/workflows/gh-pages.yml` will handle the rest on every push to `main`.
+
+---
+
+## 💻 Running Locally
 
 ```bash
 # Clone the repo

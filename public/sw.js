@@ -1,7 +1,7 @@
 // ═══ LocalMart Service Worker — Offline-First PWA ═══
 const CACHE = 'lm-v6';
-const ASSETS = ['/', '/index.html', '/css/variables.css', '/css/auth.css', '/css/layout.css', '/css/components.css', '/css/customer.css',
-  '/js/firebase-config.js', '/js/utils.js', '/js/offline.js', '/js/i18n.js', '/js/data.js', '/js/auth.js', '/js/map.js', '/js/vendor.js', '/js/carrier.js', '/js/customer.js', '/js/admin.js', '/js/app.js'];
+const ASSETS = ['./', './index.html', './css/variables.css', './css/auth.css', './css/layout.css', './css/components.css', './css/customer.css',
+  './js/firebase-config.js', './js/utils.js', './js/offline.js', './js/i18n.js', './js/data.js', './js/auth.js', './js/map.js', './js/vendor.js', './js/carrier.js', './js/customer.js', './js/admin.js', './js/app.js'];
 
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
